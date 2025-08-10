@@ -1,4 +1,4 @@
-package lab3;
+package assignment;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
