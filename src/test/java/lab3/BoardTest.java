@@ -2,11 +2,15 @@ package lab3;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import assignment.Board;
+import assignment.Square;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Simple test class for Board's createBoard method.
- * 
+ *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 2.0

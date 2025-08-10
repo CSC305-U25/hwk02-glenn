@@ -1,11 +1,9 @@
-package lab3;
+package assignment;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.Scanner;
-import javax.swing.JFileChooser;
+import javax.swing.*;
 
 /**
  * Utility class for handling file operations and directory management.
@@ -14,7 +12,7 @@ import javax.swing.JFileChooser;
  * through a GUI file chooser, and performing file I/O operations. This class
  * serves as the bridge between the file system and the grid board application,
  * enabling users to select and process files for display.
- * 
+ *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 2.0

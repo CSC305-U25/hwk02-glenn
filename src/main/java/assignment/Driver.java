@@ -1,12 +1,11 @@
-package lab3;
+package assignment;
 
-import lab3.FileHandler;
-import lab3.Board;
-import javax.swing.JFileChooser;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import java.io.File;
 import java.util.ArrayList;
+import javax.swing.*;
+
+import assignment.Board;
+import assignment.FileHandler;
 
 /**
  * Main driver class for the File Grid application.
@@ -15,7 +14,7 @@ import java.util.ArrayList;
  * reads files from a chosen directory, creates a board grid, and displays the
  * interactive GUI. Users can select a folder and view its files arranged in
  * an optimal grid layout with color-coded squares.
- * 
+ *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 2.0

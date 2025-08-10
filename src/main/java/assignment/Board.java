@@ -1,11 +1,13 @@
-package lab3;
+package assignment;
 
-import lab3.Square;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import javax.swing.*;
+
+import assignment.Square;
+
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -19,7 +21,7 @@ import java.awt.event.MouseEvent;
  * their colors.
  * The board automatically calculates the best grid dimensions to fit all files
  * efficiently.
- * 
+ *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 2.0

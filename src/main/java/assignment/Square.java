@@ -1,11 +1,11 @@
-package lab3;
+package assignment;
 
 /**
  * Represents a single square in the grid board that contains file information.
  * Each square has a filename, position (row and column), and a color.
  * Squares are used to visually represent files in the grid layout with
  * customizable colors for better organization and visual appeal.
- * 
+ *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 2.0
