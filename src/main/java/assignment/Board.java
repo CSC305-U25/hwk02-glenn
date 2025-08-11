@@ -1,16 +1,10 @@
 package assignment;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.LinkedHashMap;
-import javax.swing.*;
-
-import assignment.Square;
-
+import java.util.function.Consumer;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
+import javax.swing.*;
 
 /**
  * Represents a visual grid board that displays files as colored squares in a
@@ -28,168 +22,109 @@ import java.awt.event.MouseEvent;
  */
 
 public class Board extends JPanel {
-    private int rows;
-    private int cols;
-    private ArrayList<Square> squares = new ArrayList<>();
+    private final ArrayList<Square> squares = new ArrayList<>();
+    private final int gap = 6;
+    private int selectedIndex = -1;
+    private Consumer<Square> selectionListener = s -> {};
 
     public Board() {
+        setBackground(Color.WHITE);
+        addMouseMotionListener(new MouseMotionAdapter(){
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int i = indexAt(e.getX(), e.getY());
+                selectionListener.accept(getSquare(i));
+                repaint();
+            }
+        });
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                selectedIndex = indexAt(e.getX(), e.getY());
+                selectionListener.accept(getSquare(selectedIndex));
+                repaint();
+            }
+        });
     }
 
-    public void createBoard(String[] fileNames) {
-        int fileCount = fileNames.length;
-
-        int gridCol = 1;
-        int gridRow = fileCount;
-
-        for (int r = 1; r <= Math.sqrt(fileCount); r++) {
-            int c = (int) Math.ceil((double) fileCount / r);
-
-            if (r * c >= fileCount) {
-                gridRow = r;
-                gridCol = c;
-            }
-        }
-
-        this.cols = gridCol;
-        this.rows = gridRow;
-
-        System.out.println("Best grid for " + fileCount + " files: " + cols + "x" + rows);
-
-        int index = 0;
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                if (index < fileCount) {
-                    String fileName = new File(fileNames[index]).getName();
-                    Square square = new Square(fileName, i, j, "#FFFFFF");
-                    squares.add(square);
-                    index++;
-                }
-            }
-        }
+    public void onSelectionChange(Consumer<Square> listener) {
+        this.selectionListener = (listener == null) ? s -> {} : listener;
+    }
+    public void setSquare(ArrayList<Square> list) {
+        squares.clear();
+        if (list != null) squares.addAll(list);
+        selectedIndex = -1;
+        repaint();
     }
 
-    public void displayBoard() {
-        JFrame frame = new JFrame("File Grid (" + cols + " x " + rows + ")");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new GridLayout(rows, cols, 10, 10));
-
-        JPanel[][] gridPanels = new JPanel[rows][cols];
-
-        Map<String, String> rainbowColors = new LinkedHashMap<>();
-        rainbowColors.put("Red", "#FF0000");
-        rainbowColors.put("Orange", "#FF7F00");
-        rainbowColors.put("Yellow", "#FFFF00");
-        rainbowColors.put("Green", "#00FF00");
-        rainbowColors.put("Blue", "#0000FF");
-        rainbowColors.put("Indigo", "#4B0082");
-        rainbowColors.put("Violet", "#8F00FF");
-
-        String[] colors = rainbowColors.keySet().toArray(new String[0]);
-
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                gridPanels[i][j] = new JPanel();
-                gridPanels[i][j].setPreferredSize(new Dimension(100, 60));
-                gridPanels[i][j].setBorder(BorderFactory.createLineBorder(Color.BLACK));
-            }
-        }
-        for (Square square : squares) {
-            int r = square.getRow();
-            int c = square.getCol();
-
-            gridPanels[r][c].setBackground(Color.decode(square.getColor()));
-            gridPanels[r][c].setToolTipText(square.getFileName());
-            gridPanels[r][c].addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    String selectedColor = (String) JOptionPane.showInputDialog(
-                            frame,
-                            "Choose New Color:",
-                            "Color Picker",
-                            JOptionPane.PLAIN_MESSAGE,
-                            null,
-                            colors,
-                            null);
-
-                    if (selectedColor != null) {
-                        String newColor = rainbowColors.get(selectedColor);
-                        square.setColor(newColor);
-                        gridPanels[r][c].setBackground(Color.decode(newColor));
-                        frame.repaint();
-                    }
-                }
-            });
-        }
-
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                JPanel cellWrapper = new JPanel(new BorderLayout());
-                cellWrapper.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-                cellWrapper.add(gridPanels[i][j], BorderLayout.CENTER);
-                frame.add(cellWrapper);
-            }
-        }
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-    }
-
-    public void setSquare(int row, int col, Square s) {
-        if (row >= 0 && row < rows && col >= 0 && col < cols) {
-            for (int i = 0; i < squares.size(); i++) {
-                Square sq = squares.get(i);
-                if (sq.getRow() == row && sq.getCol() == col) {
-                    squares.set(i, s);
-                    return;
-                }
-            }
-            squares.add(s);
-        } else {
-            System.out.println("Invalid grid position: (" + row + ", " + col + ")");
-        }
-    }
-
-    public Square getSquare(int row, int col) {
-        for (Square s : squares) {
-            if (s.getRow() == row && s.getCol() == col) {
-                return s;
-            }
-        }
-        return null;
-    }
-
-    public int getRows() {
-        return rows;
-    }
-
-    public int getCols() {
-        return cols;
+    private Square getSquare(int idx) {
+        return (idx >= 0 && idx < squares.size()) ? squares.get(idx) : null;
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        int squareSize = 50;
-        int padding = 10;
+    public Dimension getPreferredSize() {
+        return new Dimension(960, 600);
+    }
 
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < cols; col++) {
-                int x = col * (squareSize + padding);
-                int y = row * (squareSize + padding);
-                g.setColor(Color.WHITE);
-                g.fillRect(x, y, squareSize, squareSize);
-                g.setColor(Color.BLACK);
-                g.drawRect(x, y, squareSize, squareSize);
+    @Override
+    protected void paintComponent(Graphics g0) {
+        super.paintComponent(g0);
+        if(squares.isEmpty()) return;
+
+        int n = Math.max(1, squares.size());
+        int rows = (int) Math.ceil(Math.sqrt(n));
+        int cols = (int) Math.ceil(n / (double) rows);
+
+        int need = rows * cols - squares.size();
+        for(int i = 0; i < need; i ++) {
+            squares.add(Square.placeholder());
+        }
+
+        Graphics2D g = (Graphics2D) g0.create();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        int cellW = (getWidth() - (cols + 1) * gap) / cols;
+        int cellH = (getHeight() - (rows + 1) * gap) / cols;
+        cellW = Math.max(cellW, 10);
+        cellH = Math.max(cellH, 10);
+
+        for (int i = 0; i < rows * cols; i++) {
+            int r = i / cols, c = i % cols;
+            int x = gap + c * (cellW + gap);
+            int y = gap + r * (cellH + gap);
+
+            Square sq = squares.get(i);
+            g.setColor(sq.getAwtColor());
+            g.fillRect(x, y, cellW, cellH);
+
+            g.setColor(Color.BLACK);
+            g.drawRect(x, y, cellW, cellH);
+
+            if (i == selectedIndex) {
+                g.setStroke(new BasicStroke(3f));
+                g.setColor(new Color(0, 0, 0, 160));
+                g.drawRect(x + 1, y + 1, cellW - 2, cellH - 2);
+                g.setStroke(new BasicStroke(1f));
             }
         }
+        g.dispose();
     }
 
-    public static void showGrid(int rows, int cols) {
-        JFrame frame = new JFrame("File Grid");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.add(new Board());
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+    private int indexAt(int x, int y) {
+        int n = Math.max(1, squares.size());
+        int rows = (int) Math.ceil(Math.sqrt(n));
+        int cols = (int) Math.ceil(n / (double) rows);
+        int cellW = (getWidth() - (cols + 1) * gap) / cols;
+        int cellH = (getHeight() - (rows + 1) * gap) / rows;
+        int c = (x - gap) / (cellW + gap);
+        int r = (y - gap) / (cellH + gap);
+        if (r < 0 || c < 0 || r >= rows || c >= cols) {
+            return -1;
+        }
+        int i = r * cols + c;
+        return (i >= 0 && i < squares.size()) ? i : -1;
     }
+
+
 }

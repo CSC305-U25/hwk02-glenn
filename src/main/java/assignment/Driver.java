@@ -1,11 +1,6 @@
 package assignment;
 
-import java.io.File;
-import java.util.ArrayList;
 import javax.swing.*;
-
-import assignment.Board;
-import assignment.FileHandler;
 
 /**
  * Main driver class for the File Grid application.
@@ -22,22 +17,9 @@ import assignment.FileHandler;
 
 public class Driver {
     public static void main(String[] args) {
-        String directory = FileHandler.chooseFolder();
-
-        if (directory != null) {
-            String[] fileNames = FileHandler.readFileNames(directory);
-
-            if (fileNames == null || fileNames.length == 0) {
-                System.out.println("No files.");
-                return;
-            }
-
-            Board board = new Board();
-            board.createBoard(fileNames);
-            board.displayBoard();
-        } else {
-            System.out.println("Folder Selecting Cancelled.");
-        }
-
+        SwingUtilities.invokeLater(() -> {
+            Frame frame = new Frame();
+            frame.setVisible(true);
+        });
     }
 }
