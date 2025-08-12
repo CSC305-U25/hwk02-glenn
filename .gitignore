@@ -37,3 +37,7 @@ target/
 *.project
 *.settings/
 *.gitignore
+
+# VSCode settings
+.vscode/
+.gitignore
