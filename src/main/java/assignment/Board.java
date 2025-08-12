@@ -25,11 +25,12 @@ public class Board extends JPanel {
     private final ArrayList<Square> squares = new ArrayList<>();
     private final int gap = 6;
     private int selectedIndex = -1;
-    private Consumer<Square> selectionListener = s -> {};
+    private Consumer<Square> selectionListener = s -> {
+    };
 
     public Board() {
         setBackground(Color.WHITE);
-        addMouseMotionListener(new MouseMotionAdapter(){
+        addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
                 int i = indexAt(e.getX(), e.getY());
@@ -49,11 +50,14 @@ public class Board extends JPanel {
     }
 
     public void onSelectionChange(Consumer<Square> listener) {
-        this.selectionListener = (listener == null) ? s -> {} : listener;
+        this.selectionListener = (listener == null) ? s -> {
+        } : listener;
     }
+
     public void setSquare(ArrayList<Square> list) {
         squares.clear();
-        if (list != null) squares.addAll(list);
+        if (list != null)
+            squares.addAll(list);
         selectedIndex = -1;
         repaint();
     }
@@ -70,14 +74,15 @@ public class Board extends JPanel {
     @Override
     protected void paintComponent(Graphics g0) {
         super.paintComponent(g0);
-        if(squares.isEmpty()) return;
+        if (squares.isEmpty())
+            return;
 
         int n = Math.max(1, squares.size());
         int rows = (int) Math.ceil(Math.sqrt(n));
         int cols = (int) Math.ceil(n / (double) rows);
 
         int need = rows * cols - squares.size();
-        for(int i = 0; i < need; i ++) {
+        for (int i = 0; i < need; i++) {
             squares.add(Square.placeholder());
         }
 
@@ -85,7 +90,8 @@ public class Board extends JPanel {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         int cellW = (getWidth() - (cols + 1) * gap) / cols;
-        int cellH = (getHeight() - (rows + 1) * gap) / cols;
+        int cellH = (getHeight() - (rows + 1) * gap) / rows; // <-- FIXED: use rows
+
         cellW = Math.max(cellW, 10);
         cellH = Math.max(cellH, 10);
 
@@ -125,6 +131,5 @@ public class Board extends JPanel {
         int i = r * cols + c;
         return (i >= 0 && i < squares.size()) ? i : -1;
     }
-
 
 }
