@@ -6,7 +6,6 @@ import java.util.zip.ZipInputStream;
 import java.io.*;
 import java.net.*;
 import java.nio.file.*;
-import java.util.Scanner;
 import javax.swing.*;
 
 /**
