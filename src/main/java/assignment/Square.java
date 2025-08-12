@@ -57,11 +57,6 @@ public class Square {
         this.color=  c;
     }
 
-    public String getColorHex() {
-        Color c = (color == null) ? new Color(180, 180, 180) : color;
-        return String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());
-    }
-
     private static Color determineColor(int lines) {
         if (lines < 10) {
             return Color.GREEN;
