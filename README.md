@@ -21,7 +21,7 @@ This Java application creates a visual grid display of files from a user-selecte
 1. **Using Maven:**
 
    ```bash
-   mvn compile exec:java -Dexec.mainClass="lab3.Driver"
+   mvn compile exec:java -Dexec.mainClass="assignment.Driver"
    ```
 
 2. **Using Java directly:**
