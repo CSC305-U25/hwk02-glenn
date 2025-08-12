@@ -66,6 +66,10 @@ public class Frame extends JFrame {
             selectedField.setText(
                     (sq == null || sq.isPlaceHolder()) ? "" : sq.getFileName());
         });
+        board.onHoverChange(sq -> {
+            selectedField.setText(
+                    (sq == null || sq.isPlaceHolder()) ? "" : sq.getFileName());
+        });
 
         okButton.addActionListener(e -> loadFiles());
         urlField.addActionListener(e -> loadFiles());

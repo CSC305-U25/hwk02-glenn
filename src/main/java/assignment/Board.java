@@ -26,6 +26,8 @@ public class Board extends JPanel {
     private List<Square> squares = new ArrayList<>();
     private int selectedIndex = -1;
     private Consumer<Square> onSelectionChange;
+    private int hoveredIndex = -1;
+    private Consumer<Square> onHoverChange;
 
     private static final int GAP = 18;
     private static final int PAD = 6;
@@ -35,10 +37,18 @@ public class Board extends JPanel {
         setOpaque(true);
         setBackground(Color.WHITE);
         setPreferredSize(new Dimension(960, 640));
+        ToolTipManager.sharedInstance().registerComponent(this);
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 handleClick(e.getPoint());
+            }
+        });
+
+        addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                handleHover(e.getPoint());
             }
         });
     }
@@ -52,6 +62,10 @@ public class Board extends JPanel {
         this.selectedIndex = -1;
         revalidate();
         repaint();
+    }
+
+    public void onHoverChange(Consumer<Square> listener) {
+        this.onHoverChange = listener;
     }
 
     @Override
@@ -105,6 +119,26 @@ public class Board extends JPanel {
         if (onSelectionChange != null) {
             onSelectionChange.accept(squares.get(index));
         }
+        repaint();
+    }
+
+    private void handleHover(Point p) {
+        if (squares == null || squares.isEmpty()) {
+            setToolTipText(null);
+            return;
+        }
+
+        Layout L = computeLayout(getSize(), getInsets(), squares.size());
+        int idx = pointToIndex(L, p);
+
+        if (idx == hoveredIndex) return;
+
+        hoveredIndex = idx;
+
+        Square sq = (idx >= 0 && idx < squares.size()) ? squares.get(idx) : null;
+        setToolTipText((sq != null && !sq.isPlaceHolder()) ? sq.getFileName() : null);
+        if (onHoverChange != null) onHoverChange.accept(sq);
+
         repaint();
     }
 
