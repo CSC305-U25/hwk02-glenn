@@ -1,6 +1,7 @@
 package assignment;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.awt.*;
 import java.awt.event.*;
@@ -22,53 +23,35 @@ import javax.swing.*;
  */
 
 public class Board extends JPanel {
-    private final ArrayList<Square> squares = new ArrayList<>();
-    private final int gap = 6;
+    private List<Square> squares = new ArrayList<>();
     private int selectedIndex = -1;
-    private Consumer<Square> selectionListener = s -> {
-    };
+    private Consumer<Square> onSelectionChange;
+
+    private static final int GAP = 18;
+    private static final int PAD = 6;
+    private static final Color PLACEHOLDER = new Color(230, 230, 230);
 
     public Board() {
+        setOpaque(true);
         setBackground(Color.WHITE);
-        addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                int i = indexAt(e.getX(), e.getY());
-                selectionListener.accept(getSquare(i));
-                repaint();
-            }
-        });
-
+        setPreferredSize(new Dimension(960, 640));
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                selectedIndex = indexAt(e.getX(), e.getY());
-                selectionListener.accept(getSquare(selectedIndex));
-                repaint();
+                handleClick(e.getPoint());
             }
         });
     }
 
     public void onSelectionChange(Consumer<Square> listener) {
-        this.selectionListener = (listener == null) ? s -> {
-        } : listener;
+        this.onSelectionChange = listener;
     }
 
     public void setSquare(ArrayList<Square> list) {
-        squares.clear();
-        if (list != null)
-            squares.addAll(list);
-        selectedIndex = -1;
+        this.squares = (list == null) ? new ArrayList<>() : list;
+        this.selectedIndex = -1;
+        revalidate();
         repaint();
-    }
-
-    private Square getSquare(int idx) {
-        return (idx >= 0 && idx < squares.size()) ? squares.get(idx) : null;
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(960, 600);
     }
 
     @Override
@@ -78,80 +61,121 @@ public class Board extends JPanel {
             return;
         }
 
-        Insets ins = getInsets();
-        int cx = ins.left;
-        int cy = ins.top;
-        int cw = getWidth() - ins.left - ins.right;
-        int ch = getHeight() - ins.top - ins.bottom;
-
-        int n = Math.max(1, squares.size());
-        int rows = (int) Math.ceil(Math.sqrt(n));
-        int cols = (int) Math.ceil(n / (double) rows);
-
         Graphics2D g = (Graphics2D) g0.create();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setClip(cx, cy, cw, ch);
 
-        int pad = 6;
+        Layout L = computeLayout(getSize(), getInsets(), squares.size());
+        int cells = L.rows * L.cols;
 
-        int availW = cw - (cols + 1) * gap;
-        int availH = ch - (rows + 1) * gap;
-        int cellSide = Math.max(10, Math.min(availW / cols, availH / rows));
-
-        int gridW = cols * cellSide + (cols + 1) * gap;
-        int gridH = rows * cellSide + (rows + 1) * gap;
-        int ox = cx + (cw - gridW) / 2;
-        int oy = cy + (ch - gridH) / 2;
-
-        int cellsToDraw = rows * cols;
-
-        for (int i = 0; i < cellsToDraw; i++) {
-            int r = i / cols, c = i % cols;
-            int x = ox + gap + c * (cellSide + gap);
-            int y = oy + gap + r * (cellSide + gap);
-
-            int ix = x + pad;
-            int iy = y + pad;
-            int iw = Math.max(1, cellSide -2 * pad);
-            int ih = iw;
-
-            Color fill;
-            if (i < squares.size()) {
-                Square sq = squares.get(i);
-                fill = (sq.getAwtColor() != null) ? sq.getAwtColor() : new Color(60, 60, 60);
-            } else {
-                fill = new Color (230, 230, 230);
-            }
-            g.setColor(fill);
-            g.fillRect(ix, iy, iw, ih);
+        for (int i = 0; i < cells; i++) {
+            Rectangle cell = cellInnerRect(L, i);
+            Color fill = (i < squares.size() && squares.get(i).getAwtColor() != null)
+                    ? squares.get(i).getAwtColor()
+                    : PLACEHOLDER;
+             g.setColor(fill);
+            g.fillRect(cell.x, cell.y, cell.width, cell.height);
 
             g.setColor(Color.BLACK);
             g.setStroke(new BasicStroke(1f));
-            g.drawRect(x, y, Math.max(1, iw - 1), Math.max(1, ih - 1));
+            g.drawRect(cell.x, cell.y, Math.max(1, cell.width - 1), Math.max(1, cell.height -1));
 
-            if (i == selectedIndex) {
-                g.setStroke(new BasicStroke(3f));
+            if(i == selectedIndex) {
                 g.setColor(new Color(0, 0, 0, 160));
-                g.drawRect(x + 1, y + 1, Math.max(1, iw - 3), Math.max(1, ih - 3));
+                g.setStroke(new BasicStroke(3f));
+                g.drawRect(cell.x + 2, cell.y + 2,
+                        Math.max(1, cell.width - 4), Math.max(1, cell.height -4));
                 g.setStroke(new BasicStroke(1f));
             }
         }
         g.dispose();
     }
 
-    private int indexAt(int x, int y) {
-        int n = Math.max(1, squares.size());
-        int rows = (int) Math.ceil(Math.sqrt(n));
-        int cols = (int) Math.ceil(n / (double) rows);
-        int cellW = (getWidth() - (cols + 1) * gap) / cols;
-        int cellH = (getHeight() - (rows + 1) * gap) / rows;
-        int c = (x - gap) / (cellW + gap);
-        int r = (y - gap) / (cellH + gap);
-        if (r < 0 || c < 0 || r >= rows || c >= cols) {
-            return -1;
+    private void handleClick(Point p) {
+        if (squares == null || squares.isEmpty()){
+            return;
         }
-        int i = r * cols + c;
-        return (i >= 0 && i < squares.size()) ? i : -1;
+
+        Layout L = computeLayout(getSize(), getInsets(), squares.size());
+        int index = pointToIndex(L, p);
+        if(index < 0 || index >= squares.size()){
+            return;
+        }
+
+        selectedIndex = index;
+        if (onSelectionChange != null) {
+            onSelectionChange.accept(squares.get(index));
+        }
+        repaint();
     }
 
+    private static final class Layout {
+        final int cx, cy, cw, ch;
+        final int rows, cols;
+        final int cell;
+        final int ox, oy;
+
+        Layout(int cx, int cy, int cw, int ch, int rows, int cols, int cell, int ox, int oy) {
+            this.cx = cx;
+            this.cy = cy;
+            this.cw = cw;
+            this.ch = ch;
+            this.rows = rows;
+            this.cols = cols;
+            this.cell = cell;
+            this.ox = ox;
+            this.oy = oy;
+        }
+    }
+
+    private static Layout computeLayout(Dimension size, Insets ins, int itemCount) {
+        int cx = ins.left, cy = ins.top;
+        int cw = size.width  - ins.left - ins.right;
+        int ch = size.height - ins.top  - ins.bottom;
+
+        int n = Math.max(1, itemCount);
+        int rows = (int) Math.ceil(Math.sqrt(n));
+        int cols = (int) Math.ceil(n / (double) rows);
+
+        int availW = cw - (cols + 1) * GAP;
+        int availH = ch - (rows + 1) * GAP;
+        int cell = Math.max(10, Math.min(availW / cols, availH / rows));
+
+        int gridW = cols * cell + (cols + 1) * GAP;
+        int gridH = rows * cell + (rows + 1) * GAP;
+        int ox = cx + (cw - gridW) / 2;
+        int oy = cy + (ch - gridH) / 2;
+
+        return new Layout(cx, cy, cw, ch, rows, cols, cell, ox, oy);
+    }
+
+    private static Rectangle cellOuterRect(Layout L, int index) {
+        int r = index / L.cols, c = index % L.cols;
+        int x = L.oy;
+        x = L.ox + GAP + c * (L.cell + GAP);
+        int y = L.oy + GAP + r * (L.cell + GAP);
+        return new Rectangle(x, y, L.cell, L.cell);
+    }
+
+    private static Rectangle cellInnerRect(Layout L, int index) {
+        Rectangle o = cellOuterRect(L, index);
+        return new Rectangle(o.x + PAD, o.y + PAD,
+                Math.max(1, o.width - 2 * PAD), Math.max(1, o.height - 2 * PAD));
+    }
+
+    private static int pointToIndex(Layout L, Point p) {
+        int gridW = L.cols * L.cell + (L.cols + 1) * GAP;
+        int gridH = L.rows * L.cell + (L.rows + 1) * GAP;
+        if (p.x < L.ox || p.y < L.oy || p.x > L.ox + gridW || p.y > L.oy + gridH) return -1;
+
+        int relX = p.x - L.ox - GAP;
+        int relY = p.y - L.oy - GAP;
+        int step = L.cell + GAP;
+
+        int col = relX / step, row = relY / step;
+        if (col < 0 || col >= L.cols || row < 0 || row >= L.rows) return -1;
+
+        int idx = row * L.cols + col;
+        Rectangle inner = cellInnerRect(L, idx);
+        return inner.contains(p) ? idx : -1;
+    }
 }

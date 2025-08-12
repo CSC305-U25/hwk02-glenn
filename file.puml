@@ -1,0 +1,73 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+package assignment {
+
+class Driver {
+  +main(args: String[]): void
+}
+
+class Frame {
+  -urlField: javax.swing.JTextField
+  -okButton: javax.swing.JButton
+  -selectedField: javax.swing.JTextField
+  -board: Board
+  +Frame()
+  -loadFiles(): void
+}
+
+class Board {
+  -squares: java.util.List<Square>
+  -selectedIndex: int
+  -gap: int
+  +setSquare(list: java.util.ArrayList<Square>): void
+  +onSelectionChange(listener: java.util.function.Consumer<Square>): void
+  #paintComponent(g: java.awt.Graphics): void
+}
+
+class FileHandler {
+  +fetchFromGithub(repoUrl: String): java.util.ArrayList<Square> <<static>>
+  -listRecursively(gh: javiergs.tulip.GitHubHandler, folder: String, out: java.util.ArrayList<Square>): void
+  -extractFolderPathFromUrl(url: String): String
+  -normalizeFolder(p: String): String
+  -countLines(text: String): int
+}
+
+class Square {
+  -fileName: String
+  -lineCount: int
+  -placeholder: boolean
+  -color: java.awt.Color
+  +Square(fileName: String, lineCount: int)
+  +isPlaceHolder(): boolean
+  +getFileName(): String
+  +getLineCount(): int
+  +getAwtColor(): java.awt.Color
+  +setAwtColor(c: java.awt.Color): void
+  +getColorHex(): String
+  +toString(): String
+  {static} +placeholder(): Square
+}
+
+Driver --> Frame : creates
+Frame *-- Board : composition
+Frame ..> FileHandler : uses
+Board --> "0..*" Square : renders
+FileHandler --> "0..*" Square : returns
+
+note right of Square
+  Color rule (set in ctor):
+   <10  -> GREEN
+   10..19 -> YELLOW
+   >=20 -> RED
+end note
+
+note bottom of FileHandler
+  Uses TULIP GitHubHandler to list
+  files and fetch contents, then
+  builds Squares with line counts.
+end note
+}
+
+@enduml
