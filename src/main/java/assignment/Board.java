@@ -74,43 +74,65 @@ public class Board extends JPanel {
     @Override
     protected void paintComponent(Graphics g0) {
         super.paintComponent(g0);
-        if (squares.isEmpty())
+        if (squares == null || squares.isEmpty()) {
             return;
+        }
+
+        Insets ins = getInsets();
+        int cx = ins.left;
+        int cy = ins.top;
+        int cw = getWidth() - ins.left - ins.right;
+        int ch = getHeight() - ins.top - ins.bottom;
 
         int n = Math.max(1, squares.size());
         int rows = (int) Math.ceil(Math.sqrt(n));
         int cols = (int) Math.ceil(n / (double) rows);
 
-        int need = rows * cols - squares.size();
-        for (int i = 0; i < need; i++) {
-            squares.add(Square.placeholder());
-        }
-
         Graphics2D g = (Graphics2D) g0.create();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setClip(cx, cy, cw, ch);
 
-        int cellW = (getWidth() - (cols + 1) * gap) / cols;
-        int cellH = (getHeight() - (rows + 1) * gap) / rows; // <-- FIXED: use rows
+        int pad = 6;
 
-        cellW = Math.max(cellW, 10);
-        cellH = Math.max(cellH, 10);
+        int availW = cw - (cols + 1) * gap;
+        int availH = ch - (rows + 1) * gap;
+        int cellSide = Math.max(10, Math.min(availW / cols, availH / rows));
 
-        for (int i = 0; i < rows * cols; i++) {
+        int gridW = cols * cellSide + (cols + 1) * gap;
+        int gridH = rows * cellSide + (rows + 1) * gap;
+        int ox = cx + (cw - gridW) / 2;
+        int oy = cy + (ch - gridH) / 2;
+
+        int cellsToDraw = rows * cols;
+
+        for (int i = 0; i < cellsToDraw; i++) {
             int r = i / cols, c = i % cols;
-            int x = gap + c * (cellW + gap);
-            int y = gap + r * (cellH + gap);
+            int x = ox + gap + c * (cellSide + gap);
+            int y = oy + gap + r * (cellSide + gap);
 
-            Square sq = squares.get(i);
-            g.setColor(sq.getAwtColor());
-            g.fillRect(x, y, cellW, cellH);
+            int ix = x + pad;
+            int iy = y + pad;
+            int iw = Math.max(1, cellSide -2 * pad);
+            int ih = iw;
+
+            Color fill;
+            if (i < squares.size()) {
+                Square sq = squares.get(i);
+                fill = (sq.getAwtColor() != null) ? sq.getAwtColor() : new Color(60, 60, 60);
+            } else {
+                fill = new Color (230, 230, 230);
+            }
+            g.setColor(fill);
+            g.fillRect(ix, iy, iw, ih);
 
             g.setColor(Color.BLACK);
-            g.drawRect(x, y, cellW, cellH);
+            g.setStroke(new BasicStroke(1f));
+            g.drawRect(x, y, Math.max(1, iw - 1), Math.max(1, ih - 1));
 
             if (i == selectedIndex) {
                 g.setStroke(new BasicStroke(3f));
                 g.setColor(new Color(0, 0, 0, 160));
-                g.drawRect(x + 1, y + 1, cellW - 2, cellH - 2);
+                g.drawRect(x + 1, y + 1, Math.max(1, iw - 3), Math.max(1, ih - 3));
                 g.setStroke(new BasicStroke(1f));
             }
         }

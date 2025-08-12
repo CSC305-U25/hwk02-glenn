@@ -23,13 +23,14 @@ public class Square {
         this.fileName = fileName;
         this.lineCount = lineCount;
         this.placeholder = false;
+        this.color = determineColor(lineCount);
     }
 
     private Square(boolean placeholder) {
         this.fileName = "";
         this.lineCount = 0;
         this.placeholder = placeholder;
-        this.color = new Color(230, 230, 230);
+        this.color = new Color(255, 255, 255);
     }
 
     public static Square placeholder() {
@@ -59,6 +60,16 @@ public class Square {
     public String getColorHex() {
         Color c = (color == null) ? new Color(180, 180, 180) : color;
         return String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());
+    }
+
+    private static Color determineColor(int lines) {
+        if (lines < 10) {
+            return Color.GREEN;
+        } else if (lines < 20) {
+            return Color.YELLOW;
+        } else {
+            return Color.RED;
+        }
     }
 
     @Override

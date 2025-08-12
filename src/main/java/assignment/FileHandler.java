@@ -1,7 +1,6 @@
 package assignment;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.io.*;
 import javiergs.tulip.GitHubHandler;
 
