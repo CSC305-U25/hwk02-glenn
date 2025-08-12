@@ -17,20 +17,23 @@ public class Square {
     private final String fileName;
     private final int lineCount;
     private final boolean placeholder;
-    private String colorHex;
+    private Color color;
 
     public Square(String fileName, int lineCount) {
-        this(fileName, lineCount, false);
-    }
-
-    private Square(String fileName, int lineCount, boolean placeholder) {
         this.fileName = fileName;
         this.lineCount = lineCount;
+        this.placeholder = false;
+    }
+
+    private Square(boolean placeholder) {
+        this.fileName = "";
+        this.lineCount = 0;
         this.placeholder = placeholder;
+        this.color = new Color(230, 230, 230);
     }
 
     public static Square placeholder() {
-        return new Square("", 0, true);
+        return new Square(true);
     }
 
     public String getFileName() {
@@ -46,29 +49,20 @@ public class Square {
     }
 
     public Color getAwtColor() {
-        if (placeholder)
-            return Color.WHITE;
-        if (lineCount < 10)
-            return new Color(0xB6E7A0); // light green
-        if (lineCount < 20)
-            return new Color(0xFFF176); // yellow
-        return new Color(0xEF5350); // red
+        return color;
+    }
+
+    public void setAwtColor(Color c) {
+        this.color=  c;
     }
 
     public String getColorHex() {
-        if (colorHex == null) {
-            Color c = getAwtColor();
-            colorHex = String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());
-        }
-        return colorHex;
-    }
-
-    public String toString(int row, int col) {
-        return String.format("(%d, %d) %s [%s]", row, col, fileName, getColorHex());
+        Color c = (color == null) ? new Color(180, 180, 180) : color;
+        return String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());
     }
 
     @Override
     public String toString() {
-        return toString(-1, -1);
+        return fileName + " (" + lineCount + " lines)";
     }
 }

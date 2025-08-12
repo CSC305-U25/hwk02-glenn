@@ -1,8 +1,8 @@
 package assignment;
 
 import java.util.ArrayList;
-import java.util.concurrent.*;
 import java.awt.*;
+import java.util.concurrent.ExecutionException;
 import javax.swing.*;
 
 /**
@@ -51,7 +51,7 @@ public class Frame extends JFrame {
         board.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(0, 12, 0, 12),
                 BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(Color.GRAY, 1),
+                        BorderFactory.createMatteBorder(1, 1, 1, 1, UIManager.getColor("Panel.background").darker()),
                         BorderFactory.createEmptyBorder(12, 12, 12, 12))));
         add(board, BorderLayout.CENTER);
 
@@ -87,29 +87,34 @@ public class Frame extends JFrame {
         new SwingWorker<ArrayList<Square>, Void>() {
             @Override
             protected ArrayList<Square> doInBackground() throws Exception {
-                return FileHandler.fetch(input);
+                return FileHandler.fetchFromGithub(input);
             }
 
             @Override
             protected void done() {
                 try {
-                    ArrayList<Square> list = get();
-                    board.setSquare(list);
-                    selectedField.setText("");
+                    ArrayList<Square> squares = get();
+                    board.setSquare(squares);
+                    board.repaint();
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
-                    JOptionPane.showMessageDialog(Frame.this, "Loading was interrupted.");
+                    JOptionPane.showMessageDialog(
+                        Frame.this,
+                        "Loading was interrupted.",
+                        "Interrupted",
+                        JOptionPane.ERROR_MESSAGE
+                    );
                 } catch (ExecutionException ex) {
                     Throwable cause = ex.getCause();
-                    String msg = (cause != null && cause.getMessage() != null)
-                            ? cause.getMessage()
-                            : ex.toString();
+                    String msg = (cause != null && cause.getMessage() != null) ? cause.getMessage() : ex.toString();
                     JOptionPane.showMessageDialog(
-                            Frame.this,
-                            "Failed to load files: " + msg,
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                } finally {
+                        Frame.this,
+                        "Unexpected error: " + msg,
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                }
+                finally {
                     okButton.setEnabled(true);
                     urlField.setEnabled(true);
                 }
