@@ -36,4 +36,4 @@ target/
 *.classpath
 *.project
 *.settings/
-.gitignore
+*.gitignore
