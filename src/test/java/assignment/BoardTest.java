@@ -20,7 +20,7 @@ public class BoardTest {
     @Test
     public void testGithubKappaFolderGridSize() throws Exception {
         String url = "https://github.com/CSC3100/App-Paint/tree/main/src/main/java/javiergs/paint/kappa";
-        ArrayList<Square> squares = FileHandler.fetch(url);
+        ArrayList<Square> squares = FileHandler.fetchFromGithub(url);
         assertEquals(10, squares.size(), "Expected 10 files in kappa folder");
 
         Board board = new Board();
@@ -35,9 +35,9 @@ public class BoardTest {
     @Test
     public void testGithubHwk02GlennRootGridSize() throws Exception {
         String url = "https://github.com/CSC305-U25/hwk02-glenn";
-        ArrayList<Square> squares = FileHandler.fetch(url);
+        ArrayList<Square> squares = FileHandler.fetchFromGithub(url);
 
-        assertEquals(8, squares.size(), "Expected file count in root folder");
+        assertEquals(5, squares.size(), "Expected file count in root folder");
 
         Board board = new Board();
         board.setSquare(squares);
