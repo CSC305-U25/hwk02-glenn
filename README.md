@@ -3,7 +3,7 @@
 # Lab 03 - File Grid Display
 
 **Authors:** Glenn Anciado, Oscar Chau  
-**Version:** 2.0
+**Version:** 3.0
 
 ## Description
 
