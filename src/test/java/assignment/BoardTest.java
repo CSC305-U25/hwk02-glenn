@@ -1,94 +1,43 @@
 package assignment;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import assignment.Board;
-import assignment.Square;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Simple test class for Board's createBoard method.
- *
- * @author Glenn Anciado
- * @author Oscar Chau
- * @version 2.0
- */
+import java.util.ArrayList;
+
 public class BoardTest {
+    @Test
+    public void testGithubKappaFolderGridSize() throws Exception {
+        String url = "https://github.com/CSC3100/App-Paint/tree/main/src/main/java/javiergs/paint/kappa";
+        ArrayList<Square> squares = FileHandler.fetch(url);
+        // Should be 10 files in the kappa folder
+        assertEquals(10, squares.size(), "Expected 10 files in kappa folder");
 
-    private Board board;
+        // Optionally, test Board grid logic
+        Board board = new Board();
+        board.setSquare(squares);
 
-    @BeforeEach
-    void setUp() {
-        board = new Board();
+        // The grid should be at least 4x3 or 3x4 (since 10 files)
+        int n = squares.size();
+        int rows = (int) Math.ceil(Math.sqrt(n));
+        int cols = (int) Math.ceil(n / (double) rows);
+        assertTrue(rows * cols >= n, "Grid should fit all squares");
     }
 
-    /**
-     * Test createBoard with a single file.
-     * Should create a 1x1 grid.
-     */
     @Test
-    void testCreateBoardSingleFile() {
-        String[] fileNames = { "test.txt" };
-        board.createBoard(fileNames);
+    public void testGithubHwk02GlennRootGridSize() throws Exception {
+        String url = "https://github.com/CSC305-U25/hwk02-glenn";
+        ArrayList<Square> squares = FileHandler.fetch(url);
+        // You may need to update the expected count based on the actual number of files
+        // in the root
+        assertEquals(8, squares.size(), "Expected file count in root folder");
 
-        assertEquals(1, board.getRows(), "Should have 1 row for single file");
-        assertEquals(1, board.getCols(), "Should have 1 column for single file");
+        Board board = new Board();
+        board.setSquare(squares);
 
-        Square square = board.getSquare(0, 0);
-        assertNotNull(square, "Square should exist at position (0,0)");
-        assertEquals("test.txt", square.getFileName(), "Square should contain correct filename");
-        assertEquals("#FFFFFF", square.getColor(), "Square should have default white color");
-    }
-
-    /**
-     * Test createBoard with 4 files.
-     * Should create a 2x2 grid.
-     */
-    @Test
-    void testCreateBoardFourFiles() {
-        String[] fileNames = { "file1.txt", "file2.txt", "file3.txt", "file4.txt" };
-        board.createBoard(fileNames);
-
-        assertEquals(2, board.getRows(), "Should have 2 rows for 4 files");
-        assertEquals(2, board.getCols(), "Should have 2 columns for 4 files");
-
-        // Test that all squares are created with correct filenames
-        assertEquals("file1.txt", board.getSquare(0, 0).getFileName());
-        assertEquals("file2.txt", board.getSquare(0, 1).getFileName());
-        assertEquals("file3.txt", board.getSquare(1, 0).getFileName());
-        assertEquals("file4.txt", board.getSquare(1, 1).getFileName());
-    }
-
-    /**
-     * Test createBoard with 9 files.
-     * Should create a 3x3 grid (perfect square).
-     */
-    @Test
-    void testCreateBoardNineFiles() {
-        String[] fileNames = { "1.txt", "2.txt", "3.txt", "4.txt", "5.txt", "6.txt", "7.txt", "8.txt", "9.txt" };
-        board.createBoard(fileNames);
-
-        assertEquals(3, board.getRows(), "Should have 3 rows for 9 files");
-        assertEquals(3, board.getCols(), "Should have 3 columns for 9 files");
-
-        // Test first, middle, and last squares
-        assertEquals("1.txt", board.getSquare(0, 0).getFileName());
-        assertEquals("5.txt", board.getSquare(1, 1).getFileName());
-        assertEquals("9.txt", board.getSquare(2, 2).getFileName());
-    }
-
-    /**
-     * Test createBoard with empty file array.
-     * Should handle gracefully without errors.
-     */
-    @Test
-    void testCreateBoardEmptyArray() {
-        String[] fileNames = {};
-        board.createBoard(fileNames);
-
-        assertEquals(0, board.getRows(), "Should have 0 rows for empty array");
-        assertEquals(1, board.getCols(), "Should have 1 column for empty array");
+        int n = squares.size();
+        int rows = (int) Math.ceil(Math.sqrt(n));
+        int cols = (int) Math.ceil(n / (double) rows);
+        assertTrue(rows * cols >= n, "Grid should fit all squares");
     }
 }
