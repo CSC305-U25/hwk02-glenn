@@ -18,7 +18,7 @@ import javax.swing.*;
  *
  * @author Glenn Anciado
  * @author Oscar Chau
- * @version 2.0
+ * @version 3.0
  */
 
 public class Board extends JPanel {

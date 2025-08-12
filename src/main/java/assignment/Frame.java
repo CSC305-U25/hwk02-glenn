@@ -17,10 +17,10 @@ import javax.swing.*;
  *
  * @author Glenn Anciado
  * @author Oscar Chau
- * @version 2.0
+ * @version 3.0
  */
 
-public class Frame extends JFrame{
+public class Frame extends JFrame {
     private final JTextField urlField = new JTextField();
     private final JButton okButton = new JButton("OK");
     private final JTextField selectedField = new JTextField();
@@ -49,12 +49,10 @@ public class Frame extends JFrame{
         add(topPanel, BorderLayout.NORTH);
 
         board.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createEmptyBorder(0, 12, 0, 12),
-            BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.GRAY, 1),
-                BorderFactory.createEmptyBorder(12, 12, 12, 12)
-            )
-        ));
+                BorderFactory.createEmptyBorder(0, 12, 0, 12),
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(Color.GRAY, 1),
+                        BorderFactory.createEmptyBorder(12, 12, 12, 12))));
         add(board, BorderLayout.CENTER);
 
         selectedField.setEditable(false);
@@ -66,8 +64,7 @@ public class Frame extends JFrame{
 
         board.onSelectionChange(sq -> {
             selectedField.setText(
-                (sq == null || sq.isPlaceHolder()) ? "" : sq.getFileName()
-            );
+                    (sq == null || sq.isPlaceHolder()) ? "" : sq.getFileName());
         });
 
         okButton.addActionListener(e -> loadFiles());
@@ -96,28 +93,27 @@ public class Frame extends JFrame{
             @Override
             protected void done() {
                 try {
-                        ArrayList<Square> list = get();
-                        board.setSquare(list);
-                        selectedField.setText("");
-                    } catch (InterruptedException ex) {
-                        Thread.currentThread().interrupt();
-                        JOptionPane.showMessageDialog(Frame.this, "Loading was interrupted.");
-                    } catch (ExecutionException ex) {
-                        Throwable cause = ex.getCause();
-                        String msg = (cause != null && cause.getMessage() != null)
-                                ? cause.getMessage()
-                                : ex.toString();
-                        JOptionPane.showMessageDialog(
-                                Frame.this,
-                                "Failed to load files: " + msg,
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE
-                        );
-                    } finally {
-                        okButton.setEnabled(true);
-                        urlField.setEnabled(true);
-                    }
+                    ArrayList<Square> list = get();
+                    board.setSquare(list);
+                    selectedField.setText("");
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    JOptionPane.showMessageDialog(Frame.this, "Loading was interrupted.");
+                } catch (ExecutionException ex) {
+                    Throwable cause = ex.getCause();
+                    String msg = (cause != null && cause.getMessage() != null)
+                            ? cause.getMessage()
+                            : ex.toString();
+                    JOptionPane.showMessageDialog(
+                            Frame.this,
+                            "Failed to load files: " + msg,
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    okButton.setEnabled(true);
+                    urlField.setEnabled(true);
                 }
+            }
         }.execute();
     }
 }

@@ -10,7 +10,7 @@ import java.awt.Color;
  *
  * @author Glenn Anciado
  * @author Oscar Chau
- * @version 2.0
+ * @version 3.0
  */
 
 public class Square {
@@ -46,9 +46,12 @@ public class Square {
     }
 
     public Color getAwtColor() {
-        if (placeholder) return Color.WHITE;
-        if (lineCount < 10) return new Color(0xB6E7A0); // light green
-        if (lineCount < 20) return new Color(0xFFF176); // yellow
+        if (placeholder)
+            return Color.WHITE;
+        if (lineCount < 10)
+            return new Color(0xB6E7A0); // light green
+        if (lineCount < 20)
+            return new Color(0xFFF176); // yellow
         return new Color(0xEF5350); // red
     }
 
