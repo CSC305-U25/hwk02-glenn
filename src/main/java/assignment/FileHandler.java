@@ -89,9 +89,11 @@ public class FileHandler {
         }
         return names;
     }
+
     public static ArrayList<Square> fetch(String input) throws IOException {
         ArrayList<Square> out = new ArrayList<>();
-        if (input == null || input.isBlank()) return out;
+        if (input == null || input.isBlank())
+            return out;
 
         if (input.startsWith("file://")) {
             Path root = Paths.get(URI.create(input));
@@ -111,21 +113,37 @@ public class FileHandler {
 
     private static ArrayList<Square> fetchFromGithub(String repoUrl) throws IOException {
         String cleaned = repoUrl.trim();
-        if (cleaned.endsWith(".git")) cleaned = cleaned.substring(0, cleaned.length() - 4);
+        if (cleaned.endsWith(".git"))
+            cleaned = cleaned.substring(0, cleaned.length() - 4);
 
         String[] parts = cleaned.split("/");
-        if (parts.length < 5) return new ArrayList<>();
+        if (parts.length < 5)
+            return new ArrayList<>();
         String owner = parts[3];
-        String repo  = parts[4];
+        String repo = parts[4];
 
         String branch = extractBranchFromUrl(cleaned);
 
-        if (branch == null) branch = queryDefaultBranch(owner, repo);
+        // Extract subdirectory path if present in the URL
+        String subdir = null;
+        int treeIdx = cleaned.indexOf("/tree/");
+        if (treeIdx != -1) {
+            // e.g. .../tree/main/src/main/java/javiergs/paint/kappa
+            String afterTree = cleaned.substring(treeIdx + 6); // skip "/tree/"
+            int slash = afterTree.indexOf('/');
+            if (slash != -1) {
+                subdir = afterTree.substring(slash + 1); // skip branch name
+            }
+        }
+
+        if (branch == null)
+            branch = queryDefaultBranch(owner, repo);
 
         if (branch == null) {
-            for (String b : new String[]{"main", "master"}) {
+            for (String b : new String[] { "main", "master" }) {
                 if (urlExists("https://codeload.github.com/" + owner + "/" + repo + "/zip/refs/heads/" + b)) {
-                    branch = b; break;
+                    branch = b;
+                    break;
                 }
             }
         }
@@ -140,13 +158,26 @@ public class FileHandler {
 
         Path tempDir = Files.createTempDirectory("repo-unzip-");
         Path root = unzipFirstFolder(tempZip, tempDir);
-        if (root != null) return scanLocalFolder(root);
+
+        // If subdir is specified, resolve it inside the unzipped repo
+        if (root != null && subdir != null && !subdir.isEmpty()) {
+            Path subdirPath = root.resolve(subdir);
+            if (Files.exists(subdirPath) && Files.isDirectory(subdirPath)) {
+                return scanLocalFolder(subdirPath);
+            } else {
+                System.out.println("Subdirectory not found: " + subdirPath);
+                return new ArrayList<>();
+            }
+        }
+        if (root != null)
+            return scanLocalFolder(root);
         return new ArrayList<>();
     }
 
     private static String extractBranchFromUrl(String url) {
         int i = url.indexOf("/tree/");
-        if (i == -1) i = url.indexOf("/blob/");
+        if (i == -1)
+            i = url.indexOf("/blob/");
         if (i != -1) {
             String tail = url.substring(i + 6);
             int slash = tail.indexOf('/');
@@ -161,8 +192,10 @@ public class FileHandler {
             HttpURLConnection c = (HttpURLConnection) u.openConnection();
             c.setRequestProperty("User-Agent", "FileGridApp/1.0");
             String token = System.getenv("GITHUB_TOKEN");
-            if (token != null && !token.isBlank()) c.setRequestProperty("Authorization", "token " + token);
-            if (c.getResponseCode() >= 400) return null;
+            if (token != null && !token.isBlank())
+                c.setRequestProperty("Authorization", "token " + token);
+            if (c.getResponseCode() >= 400)
+                return null;
             try (InputStream in = c.getInputStream()) {
                 String json = new String(in.readAllBytes());
                 int idx = json.indexOf("\"default_branch\"");
@@ -173,7 +206,8 @@ public class FileHandler {
                     return (q1 != -1 && q2 != -1) ? json.substring(q1 + 1, q2) : null;
                 }
             }
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
         return null;
     }
 
@@ -183,7 +217,8 @@ public class FileHandler {
             c.setRequestMethod("HEAD");
             c.setRequestProperty("User-Agent", "FileGridApp/1.0");
             String token = System.getenv("GITHUB_TOKEN");
-            if (token != null && !token.isBlank()) c.setRequestProperty("Authorization", "token " + token);
+            if (token != null && !token.isBlank())
+                c.setRequestProperty("Authorization", "token " + token);
             int code = c.getResponseCode();
             return code >= 200 && code < 400;
         } catch (IOException e) {
@@ -196,16 +231,19 @@ public class FileHandler {
         conn.setInstanceFollowRedirects(true);
         conn.setRequestProperty("User-Agent", "FileGridApp/1.0");
         String token = System.getenv("GITHUB_TOKEN");
-        if (token != null && !token.isBlank()) conn.setRequestProperty("Authorization", "token " + token);
+        if (token != null && !token.isBlank())
+            conn.setRequestProperty("Authorization", "token " + token);
 
         int code = conn.getResponseCode();
-        if (code >= 400) throw new FileNotFoundException(url + " (HTTP " + code + ")");
+        if (code >= 400)
+            throw new FileNotFoundException(url + " (HTTP " + code + ")");
 
         try (InputStream in = conn.getInputStream();
-            OutputStream out = Files.newOutputStream(dest, StandardOpenOption.TRUNCATE_EXISTING)) {
+                OutputStream out = Files.newOutputStream(dest, StandardOpenOption.TRUNCATE_EXISTING)) {
             byte[] buf = new byte[8192];
             int r;
-            while ((r = in.read(buf)) != -1) out.write(buf, 0, r);
+            while ((r = in.read(buf)) != -1)
+                out.write(buf, 0, r);
         }
     }
 
@@ -216,12 +254,12 @@ public class FileHandler {
         }
 
         try (var paths = Files.walk(root)) {
-           paths.filter(Files::isRegularFile)
-                .filter(p -> !p.getFileName().toString().startsWith("."))
-                .forEach(p -> {
-                    int lines = countLines(p);
-                    out.add(new Square(root.relativize(p).toString(), lines));
-                });
+            paths.filter(Files::isRegularFile)
+                    .filter(p -> !p.getFileName().toString().startsWith("."))
+                    .forEach(p -> {
+                        int lines = countLines(p);
+                        out.add(new Square(root.relativize(p).toString(), lines));
+                    });
         }
         System.out.println("Scanned files: " + out.size() + "under" + root);
         return out;
@@ -230,8 +268,10 @@ public class FileHandler {
     private static int countLines(Path file) {
         int n = 0;
         try (BufferedReader br = Files.newBufferedReader(file)) {
-            while (br.readLine() != null) n++;
-        } catch (IOException ignored) {}
+            while (br.readLine() != null)
+                n++;
+        } catch (IOException ignored) {
+        }
         return n;
     }
 
@@ -243,7 +283,7 @@ public class FileHandler {
             while ((e = zis.getNextEntry()) != null) {
                 String name = e.getName();
                 int slash = name.indexOf('/');
-                if(slash > 0) {
+                if (slash > 0) {
                     String first = name.substring(0, slash);
                     if (top == null) {
                         top = first;
@@ -251,7 +291,8 @@ public class FileHandler {
                 }
 
                 Path outPath = destDir.resolve(name).normalize();
-                if (!outPath.startsWith(destDir)) throw new IOException("Zip traversal attack blocked");
+                if (!outPath.startsWith(destDir))
+                    throw new IOException("Zip traversal attack blocked");
                 if (e.isDirectory()) {
                     Files.createDirectories(outPath);
                 } else {
