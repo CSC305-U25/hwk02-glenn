@@ -41,35 +41,6 @@ public class FileHandler {
         return names.toArray(String[]::new);
     }
 
-    public void rFile(String filePath) {
-        File file = new File(filePath);
-
-        if (!file.exists() || !file.isFile()) {
-            System.out.println("File was not found: " + filePath);
-            return;
-        }
-
-        try (Scanner scanner = new Scanner(file)) {
-            System.out.println("Contents of " + filePath + ":");
-            while (scanner.hasNextLine()) {
-                System.out.println(scanner.nextLine());
-            }
-        } catch (IOException e) {
-            System.out.println("Error reading File: " + e.getMessage());
-        }
-    }
-
-    public void wFile(String filePath, String content) {
-        File file = new File(filePath);
-
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write(content);
-            System.out.println("Written to File: " + filePath);
-        } catch (IOException e) {
-            System.out.println("Error Writing File: " + e.getMessage());
-        }
-    }
-
     public void cntFiles(String directoryPath) {
         File dir = new File(directoryPath);
         String[] files = dir.list();
