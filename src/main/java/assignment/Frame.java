@@ -25,14 +25,19 @@ public class Frame extends JFrame {
     private final JButton okButton = new JButton("OK");
     private final JTextField selectedField = new JTextField();
     private final Board board = new Board();
+    private final JLabel statusLabel = new JLabel("");
+    private boolean locked = false;
 
     public Frame() {
         super("Assignment");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(0, 8));
 
+        Color bg = UIManager.getColor("Panel.background");
+
         JPanel topPanel = new JPanel(new BorderLayout(8, 8));
         topPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 0, 12));
+        topPanel.setBackground(bg);
 
         JLabel urlLabel = new JLabel("GitHub Folder URL");
         urlLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
@@ -44,18 +49,19 @@ public class Frame extends JFrame {
         JPanel urlWrap = new JPanel(new BorderLayout());
         urlWrap.add(urlLabel, BorderLayout.NORTH);
         urlWrap.add(urlRow, BorderLayout.CENTER);
+        urlWrap.add(statusLabel, BorderLayout.SOUTH);
 
         topPanel.add(urlWrap, BorderLayout.CENTER);
         add(topPanel, BorderLayout.NORTH);
 
-        board.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(0, 12, 0, 12),
-                BorderFactory.createCompoundBorder(
-                        BorderFactory.createMatteBorder(1, 1, 1, 1, UIManager.getColor("Panel.background").darker()),
-                        BorderFactory.createEmptyBorder(12, 12, 12, 12))));
-        add(board, BorderLayout.CENTER);
+        JPanel boardWrap = new JPanel(new BorderLayout());
+        boardWrap.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        boardWrap.setBackground(bg);
+        boardWrap.add(board, BorderLayout.CENTER);
+        add(boardWrap, BorderLayout.CENTER);
 
         selectedField.setEditable(false);
+        selectedField.setBackground(Color.WHITE);
         JPanel bottomPanel = new JPanel(new BorderLayout(8, 8));
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 12, 12, 12));
         bottomPanel.add(new JLabel("Selected File Name:"), BorderLayout.WEST);
@@ -72,7 +78,7 @@ public class Frame extends JFrame {
     private void loadFiles() {
         String input = urlField.getText().trim();
         if (input.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter a GitHub URL or local folder path.");
+            JOptionPane.showMessageDialog(this, "Please enter a GitHub URL.");
             return;
         }
 
@@ -91,6 +97,7 @@ public class Frame extends JFrame {
                     ArrayList<Square> squares = get();
                     board.setSquare(squares);
                     board.repaint();
+                    statusLabel.setText("Scanned Files: " + squares.size());
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                     JOptionPane.showMessageDialog(

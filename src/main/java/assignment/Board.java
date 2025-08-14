@@ -19,7 +19,6 @@ public class Board extends JPanel {
 
     public Board() {
         setOpaque(true);
-        setBackground(Color.WHITE);
         sq = new ArrayList<>();
     }
 
@@ -51,8 +50,8 @@ public class Board extends JPanel {
                 gridCol = c;
             }
         }
-        this.cols = gridCol;
-        this.rows = gridRow;
+        cols = gridCol;
+        rows = gridRow;
     }
 
     @Override
@@ -66,25 +65,21 @@ public class Board extends JPanel {
             return;
         }
 
-        int gap = 10;
-        int totalGapX = gap * (cols + 1);
-        int totalGapY = gap * (rows + 1);
-        int leftoverWidth = getWidth() - totalGapX;
-        int leftoverHeight = getHeight() - totalGapY;
-        int width = leftoverWidth / cols;
-        int height = leftoverHeight / rows;
+        int w = getWidth() / cols;
+        int h = getHeight() / rows;
 
         int index = 0;
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
-                if (index >= sq.size()) {
-                    return;
+                int drawX = y * w;
+                int drawY = x * h;
+
+                if (index < sq.size()){
+                    sq.get(index++).draw(g, drawX, drawY, w, h);
+                } else {
+                    index++;
+                    Square.drawEmpty(g, drawX, drawY, w, h);
                 }
-                Square s = sq.get(index);
-                int drawX = gap + y * (width + gap);
-                int drawY = gap + x * (height + gap);
-                s.draw(g, drawX, drawY, width, height);
-                index++;
             }
         }
     }

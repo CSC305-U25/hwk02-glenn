@@ -18,21 +18,6 @@ import javiergs.tulip.GitHubHandler;
  */
 
 public class FileHandler {
-    public static ArrayList<String> getFileNames(String folderPath) {
-        ArrayList<String> names = new ArrayList<>();
-        File folder = new File(folderPath);
-        File[] files = folder.listFiles();
-
-        if (files != null) {
-            for (File f : files) {
-                if (f.isFile()) {
-                    names.add(f.getAbsolutePath());
-                }
-            }
-        }
-        return names;
-    }
-
     public static ArrayList<Square> fetchFromGithub(String repoUrl) throws IOException {
         ArrayList<Square> out = new ArrayList<>();
 
@@ -42,9 +27,7 @@ public class FileHandler {
         }
 
         String[] parts = cleaned.split("/");
-        if(parts.length < 5) {
-            return out;
-        }
+        if(parts.length < 5) return out;
         String owner = parts[3];
         String repo = parts[4];
 
@@ -52,9 +35,7 @@ public class FileHandler {
         folderPath = normalizeFolder(folderPath);
 
         GitHubHandler gh = new GitHubHandler(owner, repo);
-        if (folderPath == null) {
-            folderPath = "";
-        }
+        if (folderPath == null) folderPath = "";
         listRecursively(gh, folderPath, out);
 
         System.out.println("Scanned files: " + out.size() + " from folder " + folderPath);
@@ -75,15 +56,9 @@ public class FileHandler {
     }
 
     private static String normalizeFolder(String p) {
-        if (p == null) {
-            return "";
-        }
-        while (p.startsWith("/")) {
-            p = p.substring(1);
-        }
-        while(p.endsWith("/")) {
-            p = p.substring(0, p.length() - 1);
-        }
+        if (p == null) return "";
+        while (p.startsWith("/")) p = p.substring(1);
+        while (p.endsWith("/")) p = p.substring(0, p.length() - 1);
         return p;
     }
 
@@ -105,9 +80,7 @@ public class FileHandler {
         }
         int lines = 1;
         for (int i = 0; i < text.length(); ++i) {
-            if (text.charAt(i) == '\n') {
-                lines ++;
-            }
+            if (text.charAt(i) == '\n') lines ++;
         }
         return lines;
     }
