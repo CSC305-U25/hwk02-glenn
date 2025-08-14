@@ -35,11 +35,28 @@ public class Square {
     }
 
     public void draw(Graphics g, int x, int y, int w, int h) {
+        // Square
         g.setColor(color);
         g.fillRect(x, y, w, h);
+
+        // Border
         g.setColor(Color.BLACK);
+        g.drawRect(x, y, w, h);
+
+        // file name
         String name = fileName.substring(fileName.lastIndexOf('/') + 1);
-        g.drawString(name, x + 4, y + 14);
+        FontMetrics fm = g.getFontMetrics();
+        String text = name;
+        int tx = x + (w - fm.stringWidth(text)) / 2;
+        int ty = y + ((h - fm.getHeight()) / 2) + fm.getAscent();
+        g.drawString(name, tx, ty);
+    }
+
+    public static void drawEmpty(Graphics g, int x, int y, int w, int h) {
+        g.setColor(Color.WHITE);
+        g.fillRect(x, y, w, h);
+        g.setColor(Color.BLACK);
+        g.drawRect(x, y, w, h);
     }
 
     @Override

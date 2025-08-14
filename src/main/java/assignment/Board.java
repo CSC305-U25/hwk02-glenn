@@ -26,7 +26,6 @@ public class Board extends JPanel {
     public Board() {
         setOpaque(true);
         setBackground(Color.WHITE);
-        setPreferredSize(new Dimension(960, 640));
         sq = new ArrayList<>();
     }
 
@@ -48,14 +47,14 @@ public class Board extends JPanel {
 
         int gridCol = 1, gridRow = fileCount;
         for (int r = 1; r <= Math.sqrt(fileCount); r++) {
-            int c = (int)Math.ceil((double) fileCount / r);
+            int c = (int)Math.ceil(fileCount / (double)r);
             if (r * c >= fileCount ) {
                 gridRow = r; gridCol = c;
             }
         }
 
-        this.cols = gridCol;
-        this.rows = gridRow;
+        cols = gridCol;
+        rows = gridRow;
         System.out.printf("Grid Size: %dx%d %n", cols, rows, fileCount);
     }
 
@@ -65,20 +64,30 @@ public class Board extends JPanel {
         if (sq == null || sq.isEmpty() || cols == 0 || rows == 0) {
             return;
         }
+        calculateSize();
+        if (cols == 0 || rows == 0) {
+            return;
+        }
 
-        int width = 50;
-        int height = 50;
-        //int gap = 10;
+        int w = getWidth(), h = getHeight();
+        int cell = Math.max(1, Math.min(w / cols, h / rows));
+
+        int totalW = cols * cell;
+        int totalH = rows * cell;
+        int startX = (w - totalW) / 2;
+        int startY = (h - totalH) / 2;
 
         int index = 0;
-        for (int x = 0; x < rows; x++) {
-           for (int y = 0; y < cols; y++) {
-                if (index >= sq.size()) {
-                    return;
+        for (int r = 0; r < rows; r++) {
+           for (int c = 0; c < cols; c++) {
+                int x = startX + c * (cell);
+                int y = startY + r * (cell);
+
+                if (index < sq.size()) {
+                    sq.get(index++).draw(g, x, y, cell, cell);
+                } else {
+                    Square.drawEmpty(g, x, y, cell, cell);
                 }
-                Square s = sq.get(index);
-                s.draw(g, x, y, width, height);
-                index++;
            }
         }
     }
