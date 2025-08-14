@@ -1,6 +1,6 @@
 package assignment;
 
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * Represents a single square in the grid board that contains file information.
@@ -16,48 +16,15 @@ import java.awt.Color;
 public class Square {
     private final String fileName;
     private final int lineCount;
-    private final boolean placeholder;
-    private Color color;
+    private final Color color;
 
     public Square(String fileName, int lineCount) {
         this.fileName = fileName;
         this.lineCount = lineCount;
-        this.placeholder = false;
-        this.color = determineColor(lineCount);
+        this.color = setColor(lineCount);
     }
 
-    private Square(boolean placeholder) {
-        this.fileName = "";
-        this.lineCount = 0;
-        this.placeholder = placeholder;
-        this.color = new Color(255, 255, 255);
-    }
-
-    public static Square placeholder() {
-        return new Square(true);
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public int getLineCount() {
-        return lineCount;
-    }
-
-    public boolean isPlaceHolder() {
-        return placeholder;
-    }
-
-    public Color getAwtColor() {
-        return color;
-    }
-
-    public void setAwtColor(Color c) {
-        this.color=  c;
-    }
-
-    private static Color determineColor(int lines) {
+    private static Color setColor(int lines) {
         if (lines < 10) {
             return Color.GREEN;
         } else if (lines < 20) {
@@ -65,6 +32,14 @@ public class Square {
         } else {
             return Color.RED;
         }
+    }
+
+    public void draw(Graphics g, int x, int y, int w, int h) {
+        g.setColor(color);
+        g.fillRect(x, y, w, h);
+        g.setColor(Color.BLACK);
+        String name = fileName.substring(fileName.lastIndexOf('/') + 1);
+        g.drawString(name, x + 4, y + 14);
     }
 
     @Override

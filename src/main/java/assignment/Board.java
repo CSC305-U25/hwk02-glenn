@@ -1,10 +1,7 @@
 package assignment;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 
 /**
@@ -23,193 +20,66 @@ import javax.swing.*;
  */
 
 public class Board extends JPanel {
-    private List<Square> squares = new ArrayList<>();
-    private int selectedIndex = -1;
-    private Consumer<Square> onSelectionChange;
-    private int hoveredIndex = -1;
-    private Consumer<Square> onHoverChange;
-
-    private static final int GAP = 18;
-    private static final int PAD = 6;
-    private static final Color PLACEHOLDER = new Color(230, 230, 230);
+    private ArrayList<Square> sq;
+    private int cols, rows;
 
     public Board() {
         setOpaque(true);
         setBackground(Color.WHITE);
         setPreferredSize(new Dimension(960, 640));
-        ToolTipManager.sharedInstance().registerComponent(this);
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                handleClick(e.getPoint());
-            }
-        });
-
-        addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                handleHover(e.getPoint());
-            }
-        });
+        sq = new ArrayList<>();
     }
 
-    public void onSelectionChange(Consumer<Square> listener) {
-        this.onSelectionChange = listener;
-    }
+    public int getCols() { return cols; }
+    public int getRows() { return rows; }
 
     public void setSquare(ArrayList<Square> list) {
-        this.squares = (list == null) ? new ArrayList<>() : list;
-        this.selectedIndex = -1;
-        revalidate();
+        this.sq = (list == null) ? new ArrayList<>() : list;
+        calculateSize();
         repaint();
     }
 
-    public void onHoverChange(Consumer<Square> listener) {
-        this.onHoverChange = listener;
+    public void calculateSize() {
+        int fileCount = (sq == null) ? 0 : sq.size();
+        if (fileCount == 0) {
+            cols = rows = 0;
+            return;
+        }
+
+        int gridCol = 1, gridRow = fileCount;
+        for (int r = 1; r <= Math.sqrt(fileCount); r++) {
+            int c = (int)Math.ceil((double) fileCount / r);
+            if (r * c >= fileCount ) {
+                gridRow = r; gridCol = c;
+            }
+        }
+
+        this.cols = gridCol;
+        this.rows = gridRow;
+        System.out.printf("Grid Size: %dx%d %n", cols, rows, fileCount);
     }
 
     @Override
-    protected void paintComponent(Graphics g0) {
-        super.paintComponent(g0);
-        if (squares == null || squares.isEmpty()) {
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (sq == null || sq.isEmpty() || cols == 0 || rows == 0) {
             return;
         }
 
-        Graphics2D g = (Graphics2D) g0.create();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        int width = 50;
+        int height = 50;
+        //int gap = 10;
 
-        Layout L = computeLayout(getSize(), getInsets(), squares.size());
-        int cells = L.rows * L.cols;
-
-        for (int i = 0; i < cells; i++) {
-            Rectangle cell = cellInnerRect(L, i);
-            Color fill = (i < squares.size() && squares.get(i).getAwtColor() != null)
-                    ? squares.get(i).getAwtColor()
-                    : PLACEHOLDER;
-             g.setColor(fill);
-            g.fillRect(cell.x, cell.y, cell.width, cell.height);
-
-            g.setColor(Color.BLACK);
-            g.setStroke(new BasicStroke(1f));
-            g.drawRect(cell.x, cell.y, Math.max(1, cell.width - 1), Math.max(1, cell.height -1));
-
-            if(i == selectedIndex) {
-                g.setColor(new Color(0, 0, 0, 160));
-                g.setStroke(new BasicStroke(3f));
-                g.drawRect(cell.x + 2, cell.y + 2,
-                        Math.max(1, cell.width - 4), Math.max(1, cell.height -4));
-                g.setStroke(new BasicStroke(1f));
-            }
+        int index = 0;
+        for (int x = 0; x < rows; x++) {
+           for (int y = 0; y < cols; y++) {
+                if (index >= sq.size()) {
+                    return;
+                }
+                Square s = sq.get(index);
+                s.draw(g, x, y, width, height);
+                index++;
+           }
         }
-        g.dispose();
-    }
-
-    private void handleClick(Point p) {
-        if (squares == null || squares.isEmpty()){
-            return;
-        }
-
-        Layout L = computeLayout(getSize(), getInsets(), squares.size());
-        int index = pointToIndex(L, p);
-        if(index < 0 || index >= squares.size()){
-            return;
-        }
-
-        selectedIndex = index;
-        if (onSelectionChange != null) {
-            onSelectionChange.accept(squares.get(index));
-        }
-        repaint();
-    }
-
-    private void handleHover(Point p) {
-        if (squares == null || squares.isEmpty()) {
-            setToolTipText(null);
-            return;
-        }
-
-        Layout L = computeLayout(getSize(), getInsets(), squares.size());
-        int idx = pointToIndex(L, p);
-
-        if (idx == hoveredIndex) return;
-
-        hoveredIndex = idx;
-
-        Square sq = (idx >= 0 && idx < squares.size()) ? squares.get(idx) : null;
-        setToolTipText((sq != null && !sq.isPlaceHolder()) ? sq.getFileName() : null);
-        if (onHoverChange != null) onHoverChange.accept(sq);
-
-        repaint();
-    }
-
-    private static final class Layout {
-        final int cx, cy, cw, ch;
-        final int rows, cols;
-        final int cell;
-        final int ox, oy;
-
-        Layout(int cx, int cy, int cw, int ch, int rows, int cols, int cell, int ox, int oy) {
-            this.cx = cx;
-            this.cy = cy;
-            this.cw = cw;
-            this.ch = ch;
-            this.rows = rows;
-            this.cols = cols;
-            this.cell = cell;
-            this.ox = ox;
-            this.oy = oy;
-        }
-    }
-
-    private static Layout computeLayout(Dimension size, Insets ins, int itemCount) {
-        int cx = ins.left, cy = ins.top;
-        int cw = size.width  - ins.left - ins.right;
-        int ch = size.height - ins.top  - ins.bottom;
-
-        int n = Math.max(1, itemCount);
-        int rows = (int) Math.ceil(Math.sqrt(n));
-        int cols = (int) Math.ceil(n / (double) rows);
-
-        int availW = cw - (cols + 1) * GAP;
-        int availH = ch - (rows + 1) * GAP;
-        int cell = Math.max(10, Math.min(availW / cols, availH / rows));
-
-        int gridW = cols * cell + (cols + 1) * GAP;
-        int gridH = rows * cell + (rows + 1) * GAP;
-        int ox = cx + (cw - gridW) / 2;
-        int oy = cy + (ch - gridH) / 2;
-
-        return new Layout(cx, cy, cw, ch, rows, cols, cell, ox, oy);
-    }
-
-    private static Rectangle cellOuterRect(Layout L, int index) {
-        int r = index / L.cols, c = index % L.cols;
-        int x = L.oy;
-        x = L.ox + GAP + c * (L.cell + GAP);
-        int y = L.oy + GAP + r * (L.cell + GAP);
-        return new Rectangle(x, y, L.cell, L.cell);
-    }
-
-    private static Rectangle cellInnerRect(Layout L, int index) {
-        Rectangle o = cellOuterRect(L, index);
-        return new Rectangle(o.x + PAD, o.y + PAD,
-                Math.max(1, o.width - 2 * PAD), Math.max(1, o.height - 2 * PAD));
-    }
-
-    private static int pointToIndex(Layout L, Point p) {
-        int gridW = L.cols * L.cell + (L.cols + 1) * GAP;
-        int gridH = L.rows * L.cell + (L.rows + 1) * GAP;
-        if (p.x < L.ox || p.y < L.oy || p.x > L.ox + gridW || p.y > L.oy + gridH) return -1;
-
-        int relX = p.x - L.ox - GAP;
-        int relY = p.y - L.oy - GAP;
-        int step = L.cell + GAP;
-
-        int col = relX / step, row = relY / step;
-        if (col < 0 || col >= L.cols || row < 0 || row >= L.rows) return -1;
-
-        int idx = row * L.cols + col;
-        Rectangle inner = cellInnerRect(L, idx);
-        return inner.contains(p) ? idx : -1;
     }
 }

@@ -62,15 +62,6 @@ public class Frame extends JFrame {
         bottomPanel.add(selectedField, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
 
-        board.onSelectionChange(sq -> {
-            selectedField.setText(
-                    (sq == null || sq.isPlaceHolder()) ? "" : sq.getFileName());
-        });
-        board.onHoverChange(sq -> {
-            selectedField.setText(
-                    (sq == null || sq.isPlaceHolder()) ? "" : sq.getFileName());
-        });
-
         okButton.addActionListener(e -> loadFiles());
         urlField.addActionListener(e -> loadFiles());
 
