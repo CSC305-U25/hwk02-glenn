@@ -3,6 +3,8 @@ package assignment;
 import java.util.ArrayList;
 import java.awt.*;
 import javax.swing.*;
+import java.awt.event.*;
+import java.util.function.Consumer;
 
 /**
  * Represents a visual grid board that displays files as colored squares in a
@@ -15,20 +17,45 @@ import javax.swing.*;
  */
 public class Board extends JPanel {
     private ArrayList<Square> sq;
+    private ArrayList<Rectangle> cellBound = new ArrayList<>();
     private int cols, rows;
+    private Consumer<Square> hoverListener;
 
     public Board() {
         setOpaque(true);
         sq = new ArrayList<>();
+
+        addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (hoverListener == null || sq.isEmpty()) return;
+                int x = e.getX(), y = e.getY();
+                Square n = null;
+                for (int i = 0; i < cellBound.size() && i < sq.size(); i++) {
+                    if (cellBound.get(i).contains(x, y)) {
+                        n = sq.get(i);
+                        break;
+                    }
+                }
+                hoverListener.accept(n);
+            }
+        });
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (hoverListener != null) hoverListener.accept(null);
+            }
+        });
     }
 
-    public int getCols() {
-        return cols;
+    public void onHoverChange(Consumer<Square> n) {
+        this.hoverListener = n;
     }
 
-    public int getRows() {
-        return rows;
-    }
+    public int getCols() { return cols; }
+
+    public int getRows() { return rows; }
 
     public void setSquare(ArrayList<Square> list) {
         this.sq = (list == null) ? new ArrayList<>() : list;
@@ -73,6 +100,7 @@ public class Board extends JPanel {
             for (int y = 0; y < cols; y++) {
                 int drawX = y * w;
                 int drawY = x * h;
+                cellBound.add(new Rectangle(drawX, drawY, w, h));
 
                 if (index < sq.size()){
                     sq.get(index++).draw(g, drawX, drawY, w, h);

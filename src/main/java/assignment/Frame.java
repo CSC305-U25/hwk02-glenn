@@ -2,7 +2,6 @@ package assignment;
 
 import java.util.ArrayList;
 import java.awt.*;
-import java.util.concurrent.ExecutionException;
 import javax.swing.*;
 
 /**
@@ -26,7 +25,6 @@ public class Frame extends JFrame {
     private final JTextField selectedField = new JTextField();
     private final Board board = new Board();
     private final JLabel statusLabel = new JLabel("");
-    private boolean locked = false;
 
     public Frame() {
         super("Assignment");
@@ -42,7 +40,7 @@ public class Frame extends JFrame {
         JLabel urlLabel = new JLabel("GitHub Folder URL");
         urlLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
 
-        JPanel urlRow = new JPanel(new BorderLayout(8, 0));
+        JPanel urlRow = new JPanel(new BorderLayout(4, 0));
         urlRow.add(urlField, BorderLayout.CENTER);
         urlRow.add(okButton, BorderLayout.EAST);
 
@@ -55,10 +53,14 @@ public class Frame extends JFrame {
         add(topPanel, BorderLayout.NORTH);
 
         JPanel boardWrap = new JPanel(new BorderLayout());
-        boardWrap.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        boardWrap.setBorder(BorderFactory.createEmptyBorder(0, 12, 0, 12));
         boardWrap.setBackground(bg);
         boardWrap.add(board, BorderLayout.CENTER);
         add(boardWrap, BorderLayout.CENTER);
+
+        board.onHoverChange(sq -> {
+            selectedField.setText((sq == null) ? "" : sq.getFileName());
+        });
 
         selectedField.setEditable(false);
         selectedField.setBackground(Color.WHITE);
@@ -73,6 +75,10 @@ public class Frame extends JFrame {
 
         setSize(1100, 800);
         setLocationRelativeTo(null);
+    }
+
+    public void showHover(String text) {
+        selectedField.setText(text == null ? "" : text);
     }
 
     private void loadFiles() {
@@ -98,23 +104,11 @@ public class Frame extends JFrame {
                     board.setSquare(squares);
                     board.repaint();
                     statusLabel.setText("Scanned Files: " + squares.size());
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                    JOptionPane.showMessageDialog(
-                        Frame.this,
-                        "Loading was interrupted.",
-                        "Interrupted",
-                        JOptionPane.ERROR_MESSAGE
-                    );
-                } catch (ExecutionException ex) {
+                } catch (Exception ex) {
                     Throwable cause = ex.getCause();
-                    String msg = (cause != null && cause.getMessage() != null) ? cause.getMessage() : ex.toString();
-                    JOptionPane.showMessageDialog(
-                        Frame.this,
-                        "Unexpected error: " + msg,
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                    );
+                    if (cause == null) cause = ex;
+                    JOptionPane.showMessageDialog(Frame.this, "Error: " + cause.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 finally {
                     okButton.setEnabled(true);

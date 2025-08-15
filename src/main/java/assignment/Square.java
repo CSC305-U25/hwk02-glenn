@@ -34,6 +34,10 @@ public class Square {
         }
     }
 
+    public String getFileName() {
+        return fileName;
+    }
+
     public void draw(Graphics g, int x, int y, int w, int h) {
         // Square
         g.setColor(color);
