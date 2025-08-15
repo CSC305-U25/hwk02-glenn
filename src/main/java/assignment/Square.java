@@ -3,14 +3,13 @@ package assignment;
 import java.awt.*;
 
 /**
- * Represents a single square in the grid board that contains file information.
- * Each square has a filename, position (row and column), and a color.
- * Squares are used to visually represent files in the grid layout with
- * customizable colors for better organization and visual appeal.
- *
+ * Represents a single square in the grid board, containing file information.
+ * Each square holds a filename, line count, and a color determined by the line count.
+ * Used for visually representing files in the grid layout.
+ * 
  * @author Glenn Anciado
  * @author Oscar Chau
- * @version 3.0
+ * @version 4.0
  */
 
 public class Square {

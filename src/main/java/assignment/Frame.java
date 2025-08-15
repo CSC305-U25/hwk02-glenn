@@ -5,18 +5,13 @@ import java.awt.*;
 import javax.swing.*;
 
 /**
- * Represents a visual grid board that displays files as colored squares in a
- * GUI.
- * This class extends JPanel and provides functionality to create an optimal
- * grid layout
- * for displaying files, allowing users to interact with squares by changing
- * their colors.
- * The board automatically calculates the best grid dimensions to fit all files
- * efficiently.
- *
+ * Main application window for the file grid board.
+ * Provides a GUI for entering a GitHub folder URL, displays files as colored squares,
+ * and shows file names on hover. Handles user interaction and asynchronous loading of files.
+ * 
  * @author Glenn Anciado
  * @author Oscar Chau
- * @version 3.0
+ * @version 4.0
  */
 
 public class Frame extends JFrame {

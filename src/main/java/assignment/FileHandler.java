@@ -6,15 +6,13 @@ import javiergs.tulip.GitHubHandler;
 
 /**
  * Utility class for handling file operations and directory management.
- * Provides static methods for reading file names from directories, choosing
- * folders
- * through a GUI file chooser, and performing file I/O operations. This class
- * serves as the bridge between the file system and the grid board application,
- * enabling users to select and process files for display.
- *
+ * Provides static methods for reading file names and line counts from GitHub repositories,
+ * normalizing folder paths, and recursively listing files for display in the grid board.
+ * Serves as the bridge between the file system (specifically GitHub) and the grid board application.
+ * 
  * @author Glenn Anciado
  * @author Oscar Chau
- * @version 3.0
+ * @version 4.0
  */
 
 public class FileHandler {

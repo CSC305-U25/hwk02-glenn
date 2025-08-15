@@ -14,7 +14,7 @@ This Java application creates a visual grid display of files from a user-selecte
 ### Prerequisites
 
 - Java 17 or higher
-- Maven (optional, for dependency management)
+- Maven
 
 ### Compilation and Execution
 
@@ -22,16 +22,6 @@ This Java application creates a visual grid display of files from a user-selecte
 
    ```bash
    mvn compile exec:java -Dexec.mainClass="assignment.Driver"
-   ```
-
-2. **Using Java directly:**
-
-   ```bash
-   # Compile
-   javac -d target/classes src/main/java/lab3/*.java
-
-   # Run
-   java -cp target/classes lab3.Driver
    ```
 
 ## Usage

@@ -3,16 +3,13 @@ package assignment;
 import javax.swing.*;
 
 /**
- * Main driver class for the File Grid application.
- * This class serves as the entry point that orchestrates the file selection
- * process,
- * reads files from a chosen directory, creates a board grid, and displays the
- * interactive GUI. Users can select a folder and view its files arranged in
- * an optimal grid layout with color-coded squares.
+ * Entry point for the File Grid application.
+ * Launches the main application window for visualizing files from a GitHub repository
+ * as a grid of colored squares.
  *
  * @author Glenn Anciado
  * @author Oscar Chau
- * @version 3.0
+ * @version 4.0
  */
 
 public class Driver {
