@@ -41,3 +41,10 @@ target/
 # VSCode settings
 .vscode/
 .gitignore
+
+# Hide Astah UML files
+*.astah
+*.astah.lock
+
+# Hide Image files
+*.jpg
