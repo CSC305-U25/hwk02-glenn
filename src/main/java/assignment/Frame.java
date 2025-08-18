@@ -1,14 +1,17 @@
 package assignment;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 import java.awt.*;
+
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicBorders;
 
 /**
  * Main application window for the file grid board.
  * Provides a GUI for entering a GitHub folder URL, displays files as colored squares,
  * and shows file names on hover. Handles user interaction and asynchronous loading of files.
- * 
+ *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 4.0
@@ -18,8 +21,13 @@ public class Frame extends JFrame {
     private final JTextField urlField = new JTextField();
     private final JButton okButton = new JButton("OK");
     private final JTextField selectedField = new JTextField();
-    private final Board board = new Board();
     private final JLabel statusLabel = new JLabel("");
+
+    private final Board board = new Board();
+    private final Relations relations = new Relations();
+    private final Blackboard blackboard = new Blackboard();
+
+    private final JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
     public Frame() {
         super("Assignment");
@@ -47,29 +55,58 @@ public class Frame extends JFrame {
         topPanel.add(urlWrap, BorderLayout.CENTER);
         add(topPanel, BorderLayout.NORTH);
 
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.setBackground(UIManager.getColor("Panel.background"));
+        centerPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(1, 0, 0, 0, Color.BLACK),
+            BorderFactory.createEmptyBorder(0, 12, 0, 12)
+        ));
+        splitPane.setBorder(BorderFactory.createEmptyBorder());
+
         JPanel boardWrap = new JPanel(new BorderLayout());
-        boardWrap.setBorder(BorderFactory.createEmptyBorder(0, 12, 0, 12));
+        boardWrap.setBorder(BorderFactory.createEmptyBorder());
         boardWrap.setBackground(bg);
         boardWrap.add(board, BorderLayout.CENTER);
-        add(boardWrap, BorderLayout.CENTER);
 
-        board.onHoverChange(sq -> {
-            selectedField.setText((sq == null) ? "" : sq.getFileName());
-        });
+        JPanel relationsWrap = new JPanel(new BorderLayout());
+        relationsWrap.setBorder(BorderFactory.createEmptyBorder());
+        relationsWrap.setBackground(bg);
+        relationsWrap.add(relations, BorderLayout.CENTER);
+
+        splitPane.setLeftComponent(boardWrap);
+        splitPane.setRightComponent(relationsWrap);
+        splitPane.setOneTouchExpandable(false);
+        splitPane.setEnabled(false);
+        splitPane.setDividerSize(0);
+        splitPane.setContinuousLayout(true);
 
         selectedField.setEditable(false);
         selectedField.setBackground(Color.WHITE);
+
         JPanel bottomPanel = new JPanel(new BorderLayout(8, 8));
-        bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 12, 12, 12));
+        bottomPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(1, 0, 0, 0, Color.BLACK),
+            BorderFactory.createEmptyBorder(5, 12, 4, 12)
+        ));
         bottomPanel.add(new JLabel("Selected File Name:"), BorderLayout.WEST);
         bottomPanel.add(selectedField, BorderLayout.CENTER);
-        add(bottomPanel, BorderLayout.SOUTH);
+
+        centerPanel.add(splitPane, BorderLayout.CENTER);
+        centerPanel.add(bottomPanel, BorderLayout.SOUTH);
+        add(centerPanel, BorderLayout.CENTER);
+
+        board.setOnHoverChange(sq -> {
+            String name = (sq == null) ? null : sq.getFileName();
+            selectedField.setText(name == null ? "" : name);
+            blackboard.setSelectedFile(name);
+        });
 
         okButton.addActionListener(e -> loadFiles());
         urlField.addActionListener(e -> loadFiles());
 
         setSize(1100, 800);
         setLocationRelativeTo(null);
+        SwingUtilities.invokeLater(() -> splitPane.setDividerLocation(0.5));
     }
 
     public void showHover(String text) {

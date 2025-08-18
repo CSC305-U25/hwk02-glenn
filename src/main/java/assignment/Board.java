@@ -12,49 +12,69 @@ import java.util.function.Consumer;
  * interactive highlighting of squares on mouse hover.
  * Each square represents a file and is drawn with a color based on its line
  * count.
- * 
+ *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 4.0
  */
 public class Board extends JPanel {
-    private ArrayList<Square> sq;
+
+    private ArrayList<Square> sq = new ArrayList<>();
     private ArrayList<Rectangle> cellBound = new ArrayList<>();
     private int cols, rows;
-    private Consumer<Square> hoverListener;
+
+    private Consumer<Square> hoverListener = s -> {};
+    private int hoveredIndex = -1;
 
     public Board() {
+        //setBackground(Color.WHITE);
         setOpaque(true);
         sq = new ArrayList<>();
 
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (hoverListener == null || sq.isEmpty())
-                    return;
-                int x = e.getX(), y = e.getY();
-                Square n = null;
-                for (int i = 0; i < cellBound.size() && i < sq.size(); i++) {
-                    if (cellBound.get(i).contains(x, y)) {
-                        n = sq.get(i);
-                        break;
-                    }
+                int idx = Board.this.findCellIndex(e.getPoint());
+                if (idx != hoveredIndex) {
+                    hoveredIndex = idx;
+                    hoverListener.accept(idx >= 0 && idx < sq.size()
+                        ? sq.get(idx) : null);
+                    repaint();
                 }
-                hoverListener.accept(n);
             }
         });
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseExited(MouseEvent e) {
-                if (hoverListener != null)
+                if (hoveredIndex != -1) {
+                    hoveredIndex = -1;
                     hoverListener.accept(null);
+                    repaint();
+                }
             }
         });
     }
 
-    public void onHoverChange(Consumer<Square> n) {
-        this.hoverListener = n;
+    public Board(Blackboard bb) {
+        this();
+        if (bb != null) {
+            bb.addObserver(b -> {
+                ArrayList<Square> list = new ArrayList<>();
+                for (Blackboard.FileInfo f : b.getFiles()) {
+                    list.add(new Square(f.name, f.lines));
+                }
+                setSquare(list);
+                b.getSelectedFiles().ifPresentOrElse(
+                    sel -> hoverListener.accept(findByName(sel)),
+                    () -> hoverListener.accept(null)
+                );
+            });
+        }
+    }
+
+    public void setOnHoverChange(Consumer<Square> n) {
+        this.hoverListener = (n != null) ? n : (s -> {});
     }
 
     public int getCols() {
@@ -69,6 +89,24 @@ public class Board extends JPanel {
         this.sq = (list == null) ? new ArrayList<>() : list;
         calculateSize();
         repaint();
+    }
+
+    private Square findByName(String simpleName) {
+        for (Square s : sq) {
+            if (s.getFileName().equals(simpleName)) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+    private int findCellIndex(Point p) {
+        for (int i = 0; i < cellBound.size(); i++) {
+            if (cellBound.get(i).contains(p)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public void calculateSize() {
@@ -92,11 +130,11 @@ public class Board extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (sq == null || sq.isEmpty() || cols == 0 || rows == 0) {
-            return;
-        }
+        cellBound.clear();
+
         calculateSize();
-        if (cols == 0 || rows == 0) {
+
+        if (sq == null || sq.isEmpty() || cols == 0 || rows == 0) {
             return;
         }
 
@@ -111,11 +149,11 @@ public class Board extends JPanel {
                 cellBound.add(new Rectangle(drawX, drawY, w, h));
 
                 if (index < sq.size()) {
-                    sq.get(index++).draw(g, drawX, drawY, w, h);
+                    sq.get(index).draw(g, drawX, drawY, w, h);
                 } else {
-                    index++;
                     Square.drawEmpty(g, drawX, drawY, w, h);
                 }
+                index++;
             }
         }
     }

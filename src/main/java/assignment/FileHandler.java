@@ -9,7 +9,7 @@ import javiergs.tulip.GitHubHandler;
  * Provides static methods for reading file names and line counts from GitHub repositories,
  * normalizing folder paths, and recursively listing files for display in the grid board.
  * Serves as the bridge between the file system (specifically GitHub) and the grid board application.
- * 
+ *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 4.0
@@ -33,7 +33,6 @@ public class FileHandler {
         folderPath = normalizeFolder(folderPath);
 
         GitHubHandler gh = new GitHubHandler(owner, repo);
-        if (folderPath == null) folderPath = "";
         listRecursively(gh, folderPath, out);
 
         System.out.println("Scanned files: " + out.size() + " from folder " + folderPath);
@@ -45,11 +44,12 @@ public class FileHandler {
         for (String path : entries) {
             if(path.endsWith("/")) {
                 listRecursively(gh, path.substring(0, path.length() - 1), out);
-            } else {
-                String content = gh.getFileContent(path);
-                int lines = countLines(content);
-                out.add(new Square(path, lines));
+                continue;
             }
+            if(!path.endsWith(".java")) continue;
+            String content = gh.getFileContent(path);
+            int lines = countLines(content);
+            out.add(new Square(simpleName(path), lines));
         }
     }
 
@@ -73,13 +73,16 @@ public class FileHandler {
     }
 
     private static int countLines(String text) {
-        if (text == null || text.isEmpty()) {
-            return 0;
-        }
+        if (text == null || text.isEmpty()) return 0;
         int lines = 1;
         for (int i = 0; i < text.length(); ++i) {
-            if (text.charAt(i) == '\n') lines ++;
+            if (text.charAt(i) == '\n') lines++;
         }
         return lines;
+    }
+
+    private static String simpleName(String path) {
+        int i = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+        return(i >= 0 && i + 1 < path.length()) ? path.substring(i + 1) : path;
     }
 }
