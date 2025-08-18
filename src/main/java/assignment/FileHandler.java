@@ -1,7 +1,11 @@
 package assignment;
 
+
 import java.util.ArrayList;
+import java.util.*;
 import java.io.*;
+import java.io.IOException;
+
 import javiergs.tulip.GitHubHandler;
 
 /**
@@ -16,40 +20,59 @@ import javiergs.tulip.GitHubHandler;
  */
 
 public class FileHandler {
-    public static ArrayList<Square> fetchFromGithub(String repoUrl) throws IOException {
-        ArrayList<Square> out = new ArrayList<>();
+    private final Blackboard bb;
+    private final Parser parser;
 
+    public FileHandler(Blackboard bb) {
+        this.bb = bb;
+        this.parser = new Parser(bb);
+    }
+
+    public void fetchFromGithub(String repoUrl) throws Exception {
         String cleaned = repoUrl.trim();
         if (cleaned.endsWith(".git")){
             cleaned = cleaned.substring(0, cleaned.length()- 4);
         }
 
         String[] parts = cleaned.split("/");
-        if(parts.length < 5) return out;
+        if(parts.length < 5) throw new IllegalArgumentException("Bad Github URL: " + repoUrl);
         String owner = parts[3];
         String repo = parts[4];
 
         String folderPath = extractFolderPathFromUrl(cleaned);
         folderPath = normalizeFolder(folderPath);
 
-        GitHubHandler gh = new GitHubHandler(owner, repo);
-        listRecursively(gh, folderPath, out);
-
-        System.out.println("Scanned files: " + out.size() + " from folder " + folderPath);
-        return out;
+        loadFromGithub(owner, repo, folderPath);
     }
 
-    private static void listRecursively(GitHubHandler gh, String folder, ArrayList<Square> out) throws IOException{
+    public void loadFromGithub(String owner, String repo, String path) throws Exception {
+        GitHubHandler gh = new GitHubHandler(owner, repo);
+        List<Blackboard.FileInfo> infos = new ArrayList<>();
+        Map<String, String> sources = new LinkedHashMap<>();
+
+        listRecursively(gh, (path == null ? "" : path), infos, sources);
+        bb.setFiles(infos);
+        parser.parseAll(sources);
+    }
+
+    private static void listRecursively(GitHubHandler gh,
+                                        String folder,
+                                        List<Blackboard.FileInfo> infos,
+                                        Map<String, String> sources) throws IOException{
+        if (folder == null) folder = "";
         var entries = gh.listFiles(folder);
         for (String path : entries) {
             if(path.endsWith("/")) {
-                listRecursively(gh, path.substring(0, path.length() - 1), out);
+                listRecursively(gh, path.substring(0, path.length() - 1), infos, sources);
                 continue;
             }
             if(!path.endsWith(".java")) continue;
             String content = gh.getFileContent(path);
+            String simple = simpleName(path);
             int lines = countLines(content);
-            out.add(new Square(simpleName(path), lines));
+
+            infos.add(new Blackboard.FileInfo(simple, path, lines));
+            sources.put(simple, content);
         }
     }
 

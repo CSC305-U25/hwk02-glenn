@@ -1,6 +1,7 @@
 package assignment;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
@@ -85,8 +86,8 @@ public class Board extends JPanel {
         return rows;
     }
 
-    public void setSquare(ArrayList<Square> list) {
-        this.sq = (list == null) ? new ArrayList<>() : list;
+    public void setSquare(List<Square> list) {
+        this.sq = new ArrayList<>(list);
         calculateSize();
         repaint();
     }

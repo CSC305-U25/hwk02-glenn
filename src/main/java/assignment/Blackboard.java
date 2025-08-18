@@ -45,10 +45,12 @@ public class Blackboard {
     public void addObserver(Consumer<Blackboard> obs) {
         if (obs != null) observers.add(obs);
     }
+
     public void removeObserver(Consumer<Blackboard> obs) {
         observers.remove(obs);
     }
-    private void notifyObservers(){
+
+    public void notifyObservers(){
         for (var o : observers) {
             o.accept(this);
         }
