@@ -4,7 +4,8 @@ import java.awt.*;
 
 /**
  * Represents a single square in the grid board, containing file information.
- * Each square holds a filename, line count, and a color determined by the line count.
+ * Each square holds a filename, line count, and a color determined by the line
+ * count.
  * Used for visually representing files in the grid layout.
  * 
  * @author Glenn Anciado

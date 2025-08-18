@@ -10,8 +10,10 @@ import javax.swing.plaf.basic.BasicBorders;
 
 /**
  * Main application window for the file grid board.
- * Provides a GUI for entering a GitHub folder URL, displays files as colored squares,
- * and shows file names on hover. Handles user interaction and asynchronous loading of files.
+ * Provides a GUI for entering a GitHub folder URL, displays files as colored
+ * squares,
+ * and shows file names on hover. Handles user interaction and asynchronous
+ * loading of files.
  *
  * @author Glenn Anciado
  * @author Oscar Chau
@@ -25,7 +27,6 @@ public class Frame extends JFrame {
     private final JLabel statusLabel = new JLabel("");
 
     private final FileHandler fileHandler;
-
 
     public Frame() {
         super("Assignment");
@@ -42,9 +43,8 @@ public class Frame extends JFrame {
 
         JPanel topPanel = new JPanel(new BorderLayout(8, 8));
         topPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK),
-            BorderFactory.createEmptyBorder(8, 12, 0, 12)
-        ));
+                BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK),
+                BorderFactory.createEmptyBorder(8, 12, 0, 12)));
         topPanel.setBackground(bg);
 
         JLabel urlLabel = new JLabel("GitHub Folder URL");
@@ -84,9 +84,8 @@ public class Frame extends JFrame {
 
         JPanel bottomPanel = new JPanel(new BorderLayout(8, 8));
         bottomPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(1, 0, 0, 0, Color.BLACK),
-            BorderFactory.createEmptyBorder(0, 12, 8, 12)
-        ));
+                BorderFactory.createMatteBorder(1, 0, 0, 0, Color.BLACK),
+                BorderFactory.createEmptyBorder(0, 12, 8, 12)));
         bottomPanel.setBackground(bg);
 
         JLabel selectedTitle = new JLabel("Selected File Name:");
@@ -95,15 +94,13 @@ public class Frame extends JFrame {
         selectedField.setEditable(false);
         selectedField.setBackground(Color.WHITE);
         selectedField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.BLACK, 1),
-            BorderFactory.createEmptyBorder(5, 0, 0, 0)
-        ));
+                BorderFactory.createLineBorder(Color.BLACK, 1),
+                BorderFactory.createEmptyBorder(5, 0, 0, 0)));
 
         JPanel bottomWrap = new JPanel(new BorderLayout());
         bottomWrap.add(selectedField, BorderLayout.CENTER);
         bottomWrap.add(selectedTitle, BorderLayout.WEST);
         bottomWrap.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
-
 
         bottomPanel.add(bottomWrap, BorderLayout.CENTER);
         centerPanel.add(splitPane, BorderLayout.CENTER);
@@ -121,7 +118,7 @@ public class Frame extends JFrame {
 
         blackboard.addObserver(bb -> {
             List<Square> squares = new ArrayList<>();
-            for(var f : bb.getFiles()) {
+            for (var f : bb.getFiles()) {
                 squares.add(new Square(f.name, f.lines));
             }
             board.setSquare(squares);
@@ -161,11 +158,11 @@ public class Frame extends JFrame {
                     get();
                 } catch (Exception ex) {
                     Throwable cause = ex.getCause();
-                    if (cause == null) cause = ex;
+                    if (cause == null)
+                        cause = ex;
                     JOptionPane.showMessageDialog(Frame.this, "Error: " + cause.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                finally {
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                } finally {
                     okButton.setEnabled(true);
                     urlField.setEnabled(true);
                 }
