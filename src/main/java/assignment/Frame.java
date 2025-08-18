@@ -24,23 +24,19 @@ public class Frame extends JFrame {
     private final JTextField selectedField = new JTextField();
     private final JLabel statusLabel = new JLabel("");
 
-    private final Blackboard blackboard;
     private final FileHandler fileHandler;
-    private final Board board;
-    private final Relations relations;
 
-    private final JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
     public Frame() {
         super("Assignment");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        blackboard = new Blackboard();
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        Blackboard blackboard = new Blackboard();
+        Board board = new Board();
+        Relations relations = new Relations(blackboard);
         fileHandler = new FileHandler(blackboard);
-
-        board = new Board();
-        relations = new Relations(blackboard);
 
         Color bg = UIManager.getColor("Panel.background");
 
