@@ -2,11 +2,9 @@ package assignment;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.awt.*;
 
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicBorders;
 
 /**
  * Main application window for the file grid board.
