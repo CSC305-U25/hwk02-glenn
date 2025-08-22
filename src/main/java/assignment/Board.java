@@ -24,11 +24,12 @@ public class Board extends JPanel {
     private ArrayList<Rectangle> cellBound = new ArrayList<>();
     private int cols, rows;
 
-    private Consumer<Square> hoverListener = s -> {};
+    private Consumer<Square> hoverListener = s -> {
+    };
     private int hoveredIndex = -1;
 
     public Board() {
-        //setBackground(Color.WHITE);
+        // setBackground(Color.WHITE);
         setOpaque(true);
         sq = new ArrayList<>();
 
@@ -39,7 +40,8 @@ public class Board extends JPanel {
                 if (idx != hoveredIndex) {
                     hoveredIndex = idx;
                     hoverListener.accept(idx >= 0 && idx < sq.size()
-                        ? sq.get(idx) : null);
+                            ? sq.get(idx)
+                            : null);
                     repaint();
                 }
             }
@@ -62,20 +64,20 @@ public class Board extends JPanel {
         if (bb != null) {
             bb.addObserver(b -> {
                 ArrayList<Square> list = new ArrayList<>();
-                for (Blackboard.FileInfo f : b.getFiles()) {
+                for (FileInfo f : b.getFiles()) {
                     list.add(new Square(f.name, f.lines));
                 }
                 setSquare(list);
                 b.getSelectedFiles().ifPresentOrElse(
-                    sel -> hoverListener.accept(findByName(sel)),
-                    () -> hoverListener.accept(null)
-                );
+                        sel -> hoverListener.accept(findByName(sel)),
+                        () -> hoverListener.accept(null));
             });
         }
     }
 
     public void setOnHoverChange(Consumer<Square> n) {
-        this.hoverListener = (n != null) ? n : (s -> {});
+        this.hoverListener = (n != null) ? n : (s -> {
+        });
     }
 
     public int getCols() {

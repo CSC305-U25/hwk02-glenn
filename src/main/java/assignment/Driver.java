@@ -4,7 +4,8 @@ import javax.swing.*;
 
 /**
  * Entry point for the File Grid application.
- * Launches the main application window for visualizing files from a GitHub repository
+ * Launches the main application window for visualizing files from a GitHub
+ * repository
  * as a grid of colored squares.
  *
  * @author Glenn Anciado
