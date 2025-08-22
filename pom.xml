@@ -37,7 +37,7 @@
         <dependency>
             <groupId>com.github.javiergs</groupId>
             <artifactId>TULIP</artifactId>
-            <version>v1.1</version>
+            <version>v2.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.javaparser</groupId>
