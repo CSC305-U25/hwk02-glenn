@@ -3,7 +3,10 @@ package assignment;
 import java.util.*;
 import java.util.List;
 import java.awt.*;
+
 import javax.swing.*;
+
+import assignment.Blackboard;
 
 public class Relations extends JPanel{
 
@@ -46,8 +49,8 @@ public class Relations extends JPanel{
 
             if(r.kind == Blackboard.Relation.Kind.AGGREGATION) {
                 g.drawLine(p1.x, p1.y, p2.x, p2.y);
-            } else {
-                drawDashedLine(g, p1.x, p1.y, p2.x, p2.y, 6, 6);
+            } else if (r.kind == Blackboard.Relation.Kind.DEPENDENCY) {
+                g.drawLine(p1.x, p1.y, p2.x, p2.y);
             }
         }
 
@@ -92,25 +95,5 @@ public class Relations extends JPanel{
 
     private static Point centerOf(Rectangle r) {
         return new Point(r.x + r.width / 2, r.y + r.height / 2);
-    }
-
-    private void drawDashedLine(Graphics g, int x1, int y1, int x2, int y2,
-                                int dashLen, int gapLen) {
-        double dx = x2 - x1, dy = y2 - y1;
-        double dist = Math.hypot(dx, dy);
-        double steps = dist / (dashLen + gapLen);
-        double xStep = dx / steps;
-        double yStep = dy / steps;
-
-        double cx = x1, cy = y1;
-        for(int i = 0; i < steps; i++) {
-            int xStart = (int)cx;
-            int yStart = (int)cy;
-            int xEnd = (int)(cx + xStep * (dashLen / (double)(dashLen + gapLen)));
-            int yEnd = (int)(cy + yStep * (dashLen / (double)(dashLen + gapLen)));
-            g.drawLine(xStart, yStart, xEnd, yEnd);
-            cx += xStep;
-            cy += yStep;
-        }
     }
 }
