@@ -50,7 +50,7 @@ public class FileHandler {
 
     public void loadFromGithub(String owner, String repo, String path) throws Exception {
         GitHubHandler gh = new GitHubHandler(owner, repo);
-        List<Blackboard.FileInfo> infos = new ArrayList<>();
+        List<FileInfo> infos = new ArrayList<>();
         Map<String, String> sources = new LinkedHashMap<>();
 
         listRecursively(gh, (path == null ? "" : path), infos, sources);
@@ -60,7 +60,7 @@ public class FileHandler {
 
     private static void listRecursively(GitHubHandler gh,
             String folder,
-            List<Blackboard.FileInfo> infos,
+            List<FileInfo> infos,
             Map<String, String> sources) throws IOException {
         if (folder == null)
             folder = "";
@@ -76,7 +76,7 @@ public class FileHandler {
             String simple = simpleName(path);
             int lines = countLines(content);
 
-            infos.add(new Blackboard.FileInfo(simple, path, lines));
+            infos.add(new FileInfo(simple, path, lines));
             sources.put(simple, content);
         }
     }

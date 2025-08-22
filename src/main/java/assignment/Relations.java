@@ -9,8 +9,8 @@ public class Relations extends JPanel {
 
     private final Blackboard bb;
 
-    private List<Blackboard.ClassDesc> classes = List.of();
-    private List<Blackboard.Relation> relations = List.of();
+    private List<ClassDesc> classes = List.of();
+    private List<Relation> relations = List.of();
 
     private final Map<String, Rectangle> boxByClass = new HashMap<>();
 
@@ -45,7 +45,7 @@ public class Relations extends JPanel {
             Point p1 = centerOf(a);
             Point p2 = centerOf(b);
 
-            if (r.kind == Blackboard.Relation.Kind.AGGREGATION) {
+            if (r.kind == Relation.Kind.AGGREGATION) {
                 g.drawLine(p1.x, p1.y, p2.x, p2.y);
             } else {
                 drawDashedLine(g, p1.x, p1.y, p2.x, p2.y, 6, 6);
@@ -84,7 +84,7 @@ public class Relations extends JPanel {
     private void makeSquare(Graphics g, Rectangle r, String name) {
         int lineCount = 0;
         boolean isJavaFile = false;
-        for (Blackboard.FileInfo f : bb.getFiles()) {
+        for (FileInfo f : bb.getFiles()) {
             String fileBase = f.name;
             if (fileBase.endsWith(".java")) {
                 String baseName = fileBase.substring(0, fileBase.length() - 5);

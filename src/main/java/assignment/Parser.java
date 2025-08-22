@@ -29,12 +29,12 @@ public class Parser {
             }
         }
 
-        List<Blackboard.ClassDesc> classes = new ArrayList<>();
+        List<ClassDesc> classes = new ArrayList<>();
         for (String name : classNames) {
-            classes.add(new Blackboard.ClassDesc(name));
+            classes.add(new ClassDesc(name));
         }
 
-        List<Blackboard.Relation> relations = new ArrayList<>();
+        List<Relation> relations = new ArrayList<>();
         for (CompilationUnit cu : cMap.values()) {
             for (ClassOrInterfaceDeclaration c : cu.findAll(ClassOrInterfaceDeclaration.class)) {
                 String src = c.getNameAsString();
@@ -42,7 +42,7 @@ public class Parser {
                 for (FieldDeclaration f : c.getFields()) {
                     String t = simpleType(f.getElementType());
                     if (classNames.contains(t) && !t.equals(src)) {
-                        relations.add(new Blackboard.Relation(src, t, Blackboard.Relation.Kind.AGGREGATION));
+                        relations.add(new Relation(src, t, Relation.Kind.AGGREGATION));
                     }
                 }
 
@@ -50,7 +50,7 @@ public class Parser {
                     for (var p : m.getParameters()) {
                         String t = simpleType(p.getType());
                         if (classNames.contains(t) && !t.equals(src)) {
-                            relations.add(new Blackboard.Relation(src, t, Blackboard.Relation.Kind.DEPENDENCY));
+                            relations.add(new Relation(src, t, Relation.Kind.DEPENDENCY));
                         }
                     }
                 }
@@ -70,9 +70,9 @@ public class Parser {
         return s;
     }
 
-    private static List<Blackboard.Relation> dedupe(List<Blackboard.Relation> in) {
+    private static List<Relation> dedupe(List<Relation> in) {
         Set<String> seen = new HashSet<>();
-        List<Blackboard.Relation> out = new ArrayList<>();
+        List<Relation> out = new ArrayList<>();
         for (var r : in) {
             String key = r.src + "->" + r.dst + ":" + r.kind;
             if (seen.add(key))

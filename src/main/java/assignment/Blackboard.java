@@ -6,46 +6,6 @@ import java.util.function.*;
 
 public class Blackboard {
 
-    public static final class FileInfo {
-        public final String name;
-        public final String path;
-        public final int lines;
-
-        public FileInfo(String name, String path, int lines) {
-            this.name = name;
-            this.path = path;
-            this.lines = lines;
-        }
-
-        @Override
-        public String toString() {
-            return name + " (" + lines + " lines)";
-        }
-    }
-
-    public static final class ClassDesc {
-        public final String name;
-
-        public ClassDesc(String name) {
-            this.name = name;
-        }
-    }
-
-    public static final class Relation {
-        public enum Kind {
-            AGGREGATION, DEPENDENCY
-        }
-
-        public final String src, dst;
-        public final Kind kind;
-
-        public Relation(String src, String dst, Kind kind) {
-            this.src = src;
-            this.dst = dst;
-            this.kind = kind;
-        }
-    }
-
     private final List<FileInfo> files = new ArrayList<>();
     private final List<ClassDesc> classes = new ArrayList<>();
     private final List<Relation> relations = new ArrayList<>();

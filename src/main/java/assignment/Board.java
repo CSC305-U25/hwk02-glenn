@@ -64,7 +64,7 @@ public class Board extends JPanel {
         if (bb != null) {
             bb.addObserver(b -> {
                 ArrayList<Square> list = new ArrayList<>();
-                for (Blackboard.FileInfo f : b.getFiles()) {
+                for (FileInfo f : b.getFiles()) {
                     list.add(new Square(f.name, f.lines));
                 }
                 setSquare(list);
