@@ -80,10 +80,10 @@ public class Frame extends JFrame {
         FileTreePanel treeWrap = new FileTreePanel(blackboard);
         treeWrap.setBackground(bg);
 
-        // Create a tabbed pane for the right panel
         JTabbedPane rightTabs = new JTabbedPane();
         rightTabs.addTab("Board", boardWrap);
         rightTabs.addTab("Relations", relationsWrap);
+        rightTabs.setBackground(bg);
 
         splitPane.setLeftComponent(treeWrap);
         splitPane.setRightComponent(rightTabs);
