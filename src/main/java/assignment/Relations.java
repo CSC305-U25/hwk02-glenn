@@ -48,9 +48,9 @@ public class Relations extends JPanel{
             Point p1 = centerOf(a);
             Point p2 = centerOf(b);
 
-            if(r.kind == Blackboard.Relation.Kind.AGGREGATION) {
+            if(r.kind == Relation.Kind.AGGREGATION) {
                 g.drawLine(p1.x, p1.y, p2.x, p2.y);
-            } else if (r.kind == Blackboard.Relation.Kind.DEPENDENCY) {
+            } else if (r.kind == Relation.Kind.DEPENDENCY) {
                 g.drawLine(p1.x, p1.y, p2.x, p2.y);
             }
         }

@@ -5,6 +5,9 @@ import java.util.List;
 import java.awt.*;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+
+import org.checkerframework.checker.units.qual.t;
 
 /**
  * Main application window for the file grid board.
@@ -69,12 +72,21 @@ public class Frame extends JFrame {
         boardWrap.setBackground(bg);
         boardWrap.add(board, BorderLayout.CENTER);
 
+        // Not used rn, will be added as a tab
         JPanel relationsWrap = new JPanel(new BorderLayout());
         relationsWrap.setBackground(bg);
         relationsWrap.add(relations, BorderLayout.CENTER);
 
-        splitPane.setLeftComponent(boardWrap);
-        splitPane.setRightComponent(relationsWrap);
+        FileTreePanel treeWrap = new FileTreePanel(blackboard);
+        treeWrap.setBackground(bg);
+
+        // Create a tabbed pane for the right panel
+        JTabbedPane rightTabs = new JTabbedPane();
+        rightTabs.addTab("Board", boardWrap);
+        rightTabs.addTab("Relations", relationsWrap);
+
+        splitPane.setLeftComponent(treeWrap);
+        splitPane.setRightComponent(rightTabs);
         splitPane.setOneTouchExpandable(false);
         splitPane.setEnabled(false);
         splitPane.setDividerSize(0);
