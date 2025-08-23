@@ -4,6 +4,17 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 
+/**
+ * Central data model for the application.
+ * Stores file, class, and relation information, and notifies observers on
+ * changes.
+ * Used for communication between UI components and data processing logic.
+ * 
+ * @author Glenn Anciado
+ * @author Oscar Chau
+ * @version 5.0
+ */
+
 public class Blackboard {
 
     private final List<FileInfo> files = new ArrayList<>();

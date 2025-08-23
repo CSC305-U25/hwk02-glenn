@@ -6,13 +6,13 @@ import javax.swing.*;
 /**
  * Main application window for the file grid board.
  * Provides a GUI for entering a GitHub folder URL, displays files as colored
- * squares,
- * and shows file names on hover. Handles user interaction and asynchronous
+ * squares, and shows file names on hover. Handles user interaction and
+ * asynchronous
  * loading of files.
  *
  * @author Glenn Anciado
  * @author Oscar Chau
- * @version 4.0
+ * @version 5.0
  */
 
 public class Frame extends JFrame {

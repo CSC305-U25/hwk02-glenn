@@ -5,6 +5,16 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Main content panel for the application.
+ * Contains the split pane with the file tree and tabbed board/relations view,
+ * as well as the bottom panel for file selection status.
+ * 
+ * @author Glenn Anciado
+ * @author Oscar Chau
+ * @version 5.0
+ */
+
 public class MainPanel extends JPanel {
     public MainPanel(Blackboard blackboard, JTextField selectedField, JLabel statusLabel) {
         super(new BorderLayout());

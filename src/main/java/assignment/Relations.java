@@ -6,9 +6,17 @@ import java.awt.*;
 
 import javax.swing.*;
 
-import assignment.Blackboard;
+/**
+ * Panel for visualizing class relationships as a diagram.
+ * Draws classes and their aggregation/dependency relations in a circular
+ * layout.
+ * 
+ * @author Glenn Anciado
+ * @author Oscar Chau
+ * @version 5.0
+ */
 
-public class Relations extends JPanel{
+public class Relations extends JPanel {
 
     private final Blackboard bb;
 
@@ -48,7 +56,7 @@ public class Relations extends JPanel{
             Point p1 = centerOf(a);
             Point p2 = centerOf(b);
 
-            if(r.kind == Relation.Kind.AGGREGATION) {
+            if (r.kind == Relation.Kind.AGGREGATION) {
                 g.drawLine(p1.x, p1.y, p2.x, p2.y);
             } else if (r.kind == Relation.Kind.DEPENDENCY) {
                 g.drawLine(p1.x, p1.y, p2.x, p2.y);

@@ -1,5 +1,14 @@
 package assignment;
 
+/**
+ * Represents metadata for a file in the repository.
+ * Stores the file's simple name, full path, and line count.
+ * 
+ * @author Glenn Anciado
+ * @author Oscar Chau
+ * @version 5.0
+ */
+
 public class FileInfo {
     public final String name;
     public final String path;

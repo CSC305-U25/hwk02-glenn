@@ -7,6 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
+/**
+ * Panel for displaying a file tree structure using a JTree.
+ * Observes the Blackboard and updates the tree when file data changes.
+ * 
+ * @author Glenn Anciado
+ * @author Oscar Chau
+ * @version 5.0
+ */
+
 public class FileTreePanel extends JPanel {
     private final JTree tree;
     private final DefaultTreeModel treeModel;

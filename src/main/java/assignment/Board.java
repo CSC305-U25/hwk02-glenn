@@ -16,8 +16,9 @@ import java.util.function.Consumer;
  *
  * @author Glenn Anciado
  * @author Oscar Chau
- * @version 4.0
+ * @version 5.0
  */
+
 public class Board extends JPanel {
 
     private ArrayList<Square> sq = new ArrayList<>();

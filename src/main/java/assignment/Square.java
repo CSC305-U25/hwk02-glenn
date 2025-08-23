@@ -10,7 +10,7 @@ import java.awt.*;
  * 
  * @author Glenn Anciado
  * @author Oscar Chau
- * @version 4.0
+ * @version 5.0
  */
 
 public class Square {

@@ -7,6 +7,16 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.type.Type;
 
+/**
+ * Parses Java source files to extract class and relation information.
+ * Uses JavaParser to analyze source code and populate the Blackboard with
+ * class and dependency/aggregation relations.
+ * 
+ * @author Glenn Anciado
+ * @author Oscar Chau
+ * @version 5.0
+ */
+
 public class Parser {
 
     private final Blackboard blackboard;
