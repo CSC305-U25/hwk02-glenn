@@ -25,6 +25,8 @@ public class MainPanel extends JPanel {
 
         Board board = new Board();
         Relations relations = new Relations(blackboard);
+        Diagram diagram = new Diagram(blackboard);
+        Metrics metrics = new Metrics(blackboard);
 
         JPanel boardWrap = new JPanel(new BorderLayout());
         boardWrap.setBackground(bg);
@@ -34,12 +36,22 @@ public class MainPanel extends JPanel {
         relationsWrap.setBackground(bg);
         relationsWrap.add(relations, BorderLayout.CENTER);
 
+        JPanel classDiagramWrap = new JPanel(new BorderLayout());
+        classDiagramWrap.setBackground(bg);
+        classDiagramWrap.add(diagram, BorderLayout.CENTER);
+
+        JPanel metricsWrap = new JPanel(new BorderLayout());
+        metricsWrap.setBackground(bg);
+        metricsWrap.add(metrics, BorderLayout.CENTER);
+
         FileTreePanel treeWrap = new FileTreePanel(blackboard);
         treeWrap.setBackground(bg);
 
         JTabbedPane rightTabs = new JTabbedPane();
         rightTabs.addTab("Board", boardWrap);
         rightTabs.addTab("Relations", relationsWrap);
+        rightTabs.addTab("Class Diagram", classDiagramWrap);
+        rightTabs.addTab("Metrics", metricsWrap);
         rightTabs.setBackground(bg);
 
         splitPane.setLeftComponent(treeWrap);
