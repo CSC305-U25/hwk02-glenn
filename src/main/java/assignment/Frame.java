@@ -1,13 +1,7 @@
 package assignment;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.awt.*;
-
 import javax.swing.*;
-import javax.swing.border.Border;
-
-import org.checkerframework.checker.units.qual.t;
 
 /**
  * Main application window for the file grid board.
@@ -34,10 +28,7 @@ public class Frame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         Blackboard blackboard = new Blackboard();
-        Board board = new Board();
-        Relations relations = new Relations(blackboard);
         fileHandler = new FileHandler(blackboard);
 
         Color bg = UIManager.getColor("Panel.background");
@@ -64,81 +55,14 @@ public class Frame extends JFrame {
         topPanel.add(urlWrap, BorderLayout.CENTER);
         add(topPanel, BorderLayout.NORTH);
 
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.setBackground(bg);
-        splitPane.setBorder(BorderFactory.createEmptyBorder());
-
-        JPanel boardWrap = new JPanel(new BorderLayout());
-        boardWrap.setBackground(bg);
-        boardWrap.add(board, BorderLayout.CENTER);
-
-        // Not used rn, will be added as a tab
-        JPanel relationsWrap = new JPanel(new BorderLayout());
-        relationsWrap.setBackground(bg);
-        relationsWrap.add(relations, BorderLayout.CENTER);
-
-        FileTreePanel treeWrap = new FileTreePanel(blackboard);
-        treeWrap.setBackground(bg);
-
-        JTabbedPane rightTabs = new JTabbedPane();
-        rightTabs.addTab("Board", boardWrap);
-        rightTabs.addTab("Relations", relationsWrap);
-        rightTabs.setBackground(bg);
-
-        splitPane.setLeftComponent(treeWrap);
-        splitPane.setRightComponent(rightTabs);
-        splitPane.setOneTouchExpandable(false);
-        splitPane.setEnabled(false);
-        splitPane.setDividerSize(0);
-        splitPane.setContinuousLayout(true);
-
-        JPanel bottomPanel = new JPanel(new BorderLayout(8, 8));
-        bottomPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(1, 0, 0, 0, Color.BLACK),
-                BorderFactory.createEmptyBorder(0, 12, 8, 12)));
-        bottomPanel.setBackground(bg);
-
-        JLabel selectedTitle = new JLabel("Selected File Name:");
-        selectedTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
-
-        selectedField.setEditable(false);
-        selectedField.setBackground(Color.WHITE);
-        selectedField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.BLACK, 1),
-                BorderFactory.createEmptyBorder(5, 0, 0, 0)));
-
-        JPanel bottomWrap = new JPanel(new BorderLayout());
-        bottomWrap.add(selectedField, BorderLayout.CENTER);
-        bottomWrap.add(selectedTitle, BorderLayout.WEST);
-        bottomWrap.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
-
-        bottomPanel.add(bottomWrap, BorderLayout.CENTER);
-        centerPanel.add(splitPane, BorderLayout.CENTER);
-        centerPanel.add(bottomPanel, BorderLayout.SOUTH);
-        add(centerPanel, BorderLayout.CENTER);
-
-        board.setOnHoverChange(sq -> {
-            String name = (sq == null) ? null : sq.getFileName();
-            selectedField.setText(name == null ? "" : name);
-            blackboard.setSelectedFile(name);
-        });
+        MainPanel mainPanel = new MainPanel(blackboard, selectedField, statusLabel);
+        add(mainPanel, BorderLayout.CENTER);
 
         okButton.addActionListener(e -> loadFiles());
         urlField.addActionListener(e -> loadFiles());
 
-        blackboard.addObserver(bb -> {
-            List<Square> squares = new ArrayList<>();
-            for (var f : bb.getFiles()) {
-                squares.add(new Square(f.name, f.lines));
-            }
-            board.setSquare(squares);
-            board.repaint();
-            statusLabel.setText("Scanned files: " + squares.size());
-        });
-
         setSize(1100, 800);
         setLocationRelativeTo(null);
-        SwingUtilities.invokeLater(() -> splitPane.setDividerLocation(0.5));
     }
 
     public void showHover(String text) {
