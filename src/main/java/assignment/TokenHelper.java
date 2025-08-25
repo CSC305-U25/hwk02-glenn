@@ -8,7 +8,7 @@ public final class TokenHelper {
     private TokenHelper() {}
 
     public static String getToken() {
-        String t = firstNonBlank(System.getenv("GITHUB_TOKEN"), System.getenv("token"));
+        String t = firstNonBlank(System.getenv("token"));
         if (t != null) return t.trim();
 
         Path p = Paths.get(".config", "local.properties");
@@ -16,10 +16,7 @@ public final class TokenHelper {
             Properties props = new Properties();
             try (InputStream in = Files.newInputStream(p)) {
                 props.load(in);
-                t = firstNonBlank(
-                        props.getProperty("token"),
-                        props.getProperty("GITHUB_TOKEN"),
-                        props.getProperty("github.token"));
+                t = firstNonBlank(props.getProperty("token"));
                 if (t != null && !t.isBlank()) return t.trim();
             } catch (Exception ignore) {}
         }

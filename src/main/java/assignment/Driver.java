@@ -1,7 +1,5 @@
 package assignment;
 
-import javax.swing.*;
-
 /**
  * Entry point for the File Grid application.
  * Launches the main application window for visualizing files from a GitHub
@@ -12,11 +10,9 @@ import javax.swing.*;
  * @version 5.0
  */
 
-public class Driver {
+public class Driver{
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            Frame frame = new Frame();
-            frame.setVisible(true);
-        });
+        Thread t = new Thread(new Frame());
+        t.start();
     }
 }

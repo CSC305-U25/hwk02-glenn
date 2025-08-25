@@ -7,7 +7,7 @@ import java.awt.*;
  * Each square holds a filename, line count, and a color determined by the line
  * count.
  * Used for visually representing files in the grid layout.
- * 
+ *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 5.0
@@ -25,13 +25,9 @@ public class Square {
     }
 
     private static Color setColor(int lines) {
-        if (lines < 10) {
-            return Color.GREEN;
-        } else if (lines < 20) {
-            return Color.YELLOW;
-        } else {
-            return Color.RED;
-        }
+        if (lines < 10) { return Color.GREEN; }
+        else if (lines < 20) { return Color.YELLOW; }
+        else { return Color.RED; }
     }
 
     public String getFileName() {

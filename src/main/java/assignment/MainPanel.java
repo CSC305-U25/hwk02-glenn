@@ -9,18 +9,20 @@ import java.util.List;
  * Main content panel for the application.
  * Contains the split pane with the file tree and tabbed board/relations view,
  * as well as the bottom panel for file selection status.
- * 
+ *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 5.0
  */
 
-public class MainPanel extends JPanel {
+public class MainPanel extends JPanel{
+    private JSplitPane splitPane;
+
     public MainPanel(Blackboard blackboard, JTextField selectedField, JLabel statusLabel) {
         super(new BorderLayout());
         Color bg = UIManager.getColor("Panel.background");
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setBorder(BorderFactory.createEmptyBorder());
 
         Board board = new Board();
@@ -46,6 +48,7 @@ public class MainPanel extends JPanel {
 
         FileTreePanel treeWrap = new FileTreePanel(blackboard);
         treeWrap.setBackground(bg);
+        treeWrap.setPreferredSize(new Dimension(260, 1));
 
         JTabbedPane rightTabs = new JTabbedPane();
         rightTabs.addTab("Board", boardWrap);
@@ -58,7 +61,7 @@ public class MainPanel extends JPanel {
         splitPane.setRightComponent(rightTabs);
         splitPane.setOneTouchExpandable(false);
         splitPane.setEnabled(false);
-        splitPane.setDividerSize(0);
+        splitPane.setDividerSize(5);
         splitPane.setContinuousLayout(true);
 
         JPanel bottomPanel = new JPanel(new BorderLayout(8, 8));
@@ -67,7 +70,7 @@ public class MainPanel extends JPanel {
                 BorderFactory.createEmptyBorder(0, 12, 8, 12)));
         bottomPanel.setBackground(bg);
 
-        JLabel selectedTitle = new JLabel("Selected File Name:");
+        JLabel selectedTitle = new JLabel("Error:");
         selectedTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
 
         selectedField.setEditable(false);
@@ -86,13 +89,7 @@ public class MainPanel extends JPanel {
         add(splitPane, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
 
-        board.setOnHoverChange(sq -> {
-            String name = (sq == null) ? null : sq.getFileName();
-            selectedField.setText(name == null ? "" : name);
-            blackboard.setSelectedFile(name);
-        });
-
-        blackboard.addObserver(bb -> {
+        blackboard.addObserver(bb -> EventQueue.invokeLater(() -> {
             List<Square> squares = new ArrayList<>();
             for (var f : bb.getFiles()) {
                 squares.add(new Square(f.name, f.lines));
@@ -100,8 +97,6 @@ public class MainPanel extends JPanel {
             board.setSquare(squares);
             board.repaint();
             statusLabel.setText("Scanned files: " + squares.size());
-        });
-
-        SwingUtilities.invokeLater(() -> splitPane.setDividerLocation(0.5));
+        }));
     }
 }

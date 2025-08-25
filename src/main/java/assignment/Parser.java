@@ -11,14 +11,13 @@ import com.github.javaparser.ast.type.Type;
  * Parses Java source files to extract class and relation information.
  * Uses JavaParser to analyze source code and populate the Blackboard with
  * class and dependency/aggregation relations.
- * 
+ *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 5.0
  */
 
 public class Parser {
-
     private final Blackboard blackboard;
 
     public Parser(Blackboard bb) {
@@ -33,7 +32,8 @@ public class Parser {
             try {
                 CompilationUnit cu = StaticJavaParser.parse(e.getValue());
                 cMap.put(e.getKey(), cu);
-                cu.findAll(ClassOrInterfaceDeclaration.class).forEach(x -> classNames.add(x.getNameAsString()));
+                cu.findAll(ClassOrInterfaceDeclaration.class)
+                        .forEach(x -> classNames.add(x.getNameAsString()));
             } catch (Exception ex) {
                 System.err.println("Parse error in " + e.getKey() + ": " + ex.getMessage());
             }
@@ -72,11 +72,10 @@ public class Parser {
     private static String simpleType(Type t) {
         String s = t.asString();
         int lt = s.indexOf('<');
-        if (lt >= 0)
-            s = s.substring(0, lt);
+        if (lt >= 0) s = s.substring(0, lt);
+
         int dot = s.lastIndexOf('.');
-        if (dot >= 0 && dot + 1 < s.length())
-            s = s.substring(dot + 1);
+        if (dot >= 0 && dot + 1 < s.length()) s = s.substring(dot + 1);
         return s;
     }
 
@@ -87,7 +86,6 @@ public class Parser {
             String key = r.src + "->" + r.dst + ":" + r.kind;
             if (seen.add(key))
                 out.add(r);
-        }
-        return out;
+        } return out;
     }
 }

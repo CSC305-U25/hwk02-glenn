@@ -25,6 +25,9 @@ public class FileHandler {
         this.bb = bb;
         this.parser = new Parser(bb);
     }
+    public void fetchFromGithub(String repoUrl) throws Exception {
+        fetchFromGithub(repoUrl, p -> true);
+    }
 
     public void fetchFromGithub(String repoUrl, FilePathFilter filter) throws Exception {
         URLHelper uh = URLHelper.parseGitHubUrl(repoUrl);

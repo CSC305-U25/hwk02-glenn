@@ -15,17 +15,17 @@ import javax.swing.*;
  * @version 5.0
  */
 
-public class Frame extends JFrame {
-    private final JTextField urlField = new JTextField();
-    private final JButton okButton = new JButton("OK");
-    private final JTextField selectedField = new JTextField();
+public class Frame extends JFrame implements Runnable{
+    private FileHandler fileHandler;
     private final JLabel statusLabel = new JLabel("");
-
-    private final FileHandler fileHandler;
 
     public Frame() {
         super("Assignment");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    @Override
+    public void run() {
         setLayout(new BorderLayout());
 
         Blackboard blackboard = new Blackboard();
@@ -43,29 +43,34 @@ public class Frame extends JFrame {
         urlLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
 
         JPanel urlRow = new JPanel(new BorderLayout(4, 0));
+        JTextField urlField = new JTextField();
         urlRow.add(urlField, BorderLayout.CENTER);
+        JButton okButton = new JButton("OK");
         urlRow.add(okButton, BorderLayout.EAST);
 
         JPanel urlWrap = new JPanel(new BorderLayout());
         urlWrap.add(urlLabel, BorderLayout.NORTH);
         urlWrap.add(urlRow, BorderLayout.CENTER);
+
         urlWrap.add(statusLabel, BorderLayout.SOUTH);
         urlWrap.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
 
         topPanel.add(urlWrap, BorderLayout.CENTER);
         add(topPanel, BorderLayout.NORTH);
 
+        JTextField selectedField = new JTextField();
         MainPanel mainPanel = new MainPanel(blackboard, selectedField, statusLabel);
         add(mainPanel, BorderLayout.CENTER);
 
-        okButton.addActionListener(e -> loadFiles());
-        urlField.addActionListener(e -> loadFiles());
+        okButton.addActionListener(e -> loadFiles(urlField, okButton));
+        urlField.addActionListener(e -> loadFiles(urlField, okButton));
 
         setSize(1100, 800);
         setLocationRelativeTo(null);
+        setVisible(true);
     }
 
-    private void loadFiles() {
+    private void loadFiles(JTextField urlField, JButton okButton) {
         String input = urlField.getText().trim();
         if (input.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter a GitHub URL.");
@@ -76,29 +81,20 @@ public class Frame extends JFrame {
         urlField.setEnabled(false);
         statusLabel.setText("Loading...");
 
-        new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                fileHandler.fetchFromGithub(input, new JavaOnlyFilter());
-                return null;
-            }
-
-            @Override
-            protected void done() {
+        new Thread(() -> {
+            Throwable error = null;
+            try { fileHandler.fetchFromGithub(input); }
+            catch (Throwable t) { error = t; }
+            final Throwable err = error;
+            EventQueue.invokeLater(() -> {
                 try {
-                    get();
-                    statusLabel.setText("Done.");
-                } catch (Exception ex) {
-                    Throwable cause = ex.getCause();
-                    if (cause == null) cause = ex;
-                    statusLabel.setText("Error.");
-                    JOptionPane.showMessageDialog(Frame.this, "Error: " + cause.getMessage(),
-                            "Error", JOptionPane.ERROR_MESSAGE);
-                } finally {
+                    if(err == null) { statusLabel.setText("Done.");}
+                    else { statusLabel.setText("Error."); }
+                } finally{
                     okButton.setEnabled(true);
                     urlField.setEnabled(true);
                 }
-            }
-        }.execute();
+            });
+       }, "Fetch-Worker").start();
     }
 }

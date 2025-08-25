@@ -10,7 +10,7 @@ import java.util.HashMap;
 /**
  * Panel for displaying a file tree structure using a JTree.
  * Observes the Blackboard and updates the tree when file data changes.
- * 
+ *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 5.0
@@ -23,6 +23,7 @@ public class FileTreePanel extends JPanel {
 
     public FileTreePanel(Blackboard blackboard) {
         super(new BorderLayout());
+
         root = new DefaultMutableTreeNode("Files");
         treeModel = new DefaultTreeModel(root);
         tree = new JTree(treeModel);
@@ -30,11 +31,11 @@ public class FileTreePanel extends JPanel {
         tree.setShowsRootHandles(true);
 
         JScrollPane scrollPane = new JScrollPane(tree);
+
         add(scrollPane, BorderLayout.CENTER);
 
-        blackboard.addObserver(bb -> {
-            updateTree(bb.getFiles());
-        });
+        blackboard.addObserver(bb -> EventQueue.invokeLater(()->
+            updateTree(bb.getFiles())));
     }
 
     private void updateTree(List<FileInfo> files) {
@@ -61,8 +62,6 @@ public class FileTreePanel extends JPanel {
             }
         }
         treeModel.reload();
-        for (int i = 0; i < tree.getRowCount(); i++) {
-            tree.expandRow(i);
-        }
+        for (int i = 0; i < tree.getRowCount(); i++) tree.expandRow(i);
     }
 }
