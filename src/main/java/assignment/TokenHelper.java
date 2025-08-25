@@ -1,6 +1,5 @@
 package assignment;
 
-import java.nio.file.*;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -8,23 +7,18 @@ public final class TokenHelper {
     private TokenHelper() {}
 
     public static String getToken() {
-        String t = firstNonBlank(System.getenv("token"));
-        if (t != null) return t.trim();
+        String t = System.getenv("token");
+        if (t != null && !t.isBlank()) return t.trim();
 
-        Path p = Paths.get(".config", "local.properties");
-        if (Files.isRegularFile(p)) {
-            Properties props = new Properties();
-            try (InputStream in = Files.newInputStream(p)) {
+        try (InputStream in = TokenHelper.class.getClassLoader()
+                                               .getResourceAsStream("local.properties")) {
+            if (in != null) {
+                Properties props = new Properties();
                 props.load(in);
-                t = firstNonBlank(props.getProperty("token"));
+                t = props.getProperty("token");
                 if (t != null && !t.isBlank()) return t.trim();
-            } catch (Exception ignore) {}
-        }
-        return null;
-    }
-
-    private static String firstNonBlank(String... vals) {
-        for (String v : vals) if (v != null && !v.isBlank()) return v;
+            }
+        } catch (Exception ignore) {}
         return null;
     }
 }
