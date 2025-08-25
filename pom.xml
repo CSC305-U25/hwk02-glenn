@@ -37,7 +37,7 @@
         <dependency>
             <groupId>com.github.javiergs</groupId>
             <artifactId>TULIP</artifactId>
-            <version>v1.1</version>
+            <version>v2.1</version>
             <!--update 2.1 later-->
         </dependency>
         <dependency>

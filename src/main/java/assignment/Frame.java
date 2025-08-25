@@ -65,10 +65,6 @@ public class Frame extends JFrame {
         setLocationRelativeTo(null);
     }
 
-    public void showHover(String text) {
-        selectedField.setText(text == null ? "" : text);
-    }
-
     private void loadFiles() {
         String input = urlField.getText().trim();
         if (input.isEmpty()) {
@@ -78,11 +74,12 @@ public class Frame extends JFrame {
 
         okButton.setEnabled(false);
         urlField.setEnabled(false);
+        statusLabel.setText("Loading...");
 
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
-                fileHandler.fetchFromGithub(input);
+                fileHandler.fetchFromGithub(input, new JavaOnlyFilter());
                 return null;
             }
 
@@ -90,10 +87,11 @@ public class Frame extends JFrame {
             protected void done() {
                 try {
                     get();
+                    statusLabel.setText("Done.");
                 } catch (Exception ex) {
                     Throwable cause = ex.getCause();
-                    if (cause == null)
-                        cause = ex;
+                    if (cause == null) cause = ex;
+                    statusLabel.setText("Error.");
                     JOptionPane.showMessageDialog(Frame.this, "Error: " + cause.getMessage(),
                             "Error", JOptionPane.ERROR_MESSAGE);
                 } finally {
