@@ -31,7 +31,6 @@ public class Relations extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // Build a map from class name to FileInfo for all files (not just Java)
         Map<String, FileInfo> fileInfoMap = new HashMap<>();
         for (FileInfo f : bb.getFiles()) {
             String cls = Names.baseName(f.name);
@@ -72,7 +71,6 @@ public class Relations extends JPanel {
                     boolean isFolder = f.lines == 0;
                     new Square(f.name, f.lines, isFolder).draw(g, r.x, r.y, r.width, r.height);
                 } else {
-                    // fallback: just draw with class name and 0 lines
                     new Square(c.name, 0).draw(g, r.x, r.y, r.width, r.height);
                 }
             }
