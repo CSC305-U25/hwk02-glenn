@@ -19,8 +19,6 @@ public class Blackboard {
     private final List<FileInfo> files = new ArrayList<>();
     private final List<ClassDesc> classes = new ArrayList<>();
     private final List<Relation> relations = new ArrayList<>();
-    private String selectedFileSimpleName = null;
-
     private final List<Consumer<Blackboard>> observers = new CopyOnWriteArrayList<>();
 
     public void addObserver(Consumer<Blackboard> obs) {
@@ -47,18 +45,19 @@ public class Blackboard {
         notifyObservers();
     }
 
-    public void setSelectedFile(String simpleName) {
-        selectedFileSimpleName = simpleName;
-        notifyObservers();
-    }
-
     public List<FileInfo> getFiles() { return List.copyOf(files); }
 
     public List<ClassDesc> getClasses() { return List.copyOf(classes); }
 
     public List<Relation> getRelations() { return List.copyOf(relations); }
 
-    public Optional<String> getSelectedFiles() {
-        return Optional.ofNullable(selectedFileSimpleName);
-    };
+    public List<FileInfo> getJavaFiles() {
+        List<FileInfo> onlyJava = new ArrayList<>();
+        for(FileInfo f : files) {
+            if(JavaFilter.INSTANCE.test(f)) {
+                onlyJava.add(f);
+            }
+        }
+        return List.copyOf(onlyJava);
+    }
 }

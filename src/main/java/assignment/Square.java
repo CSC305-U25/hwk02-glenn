@@ -43,7 +43,6 @@ public class Square {
         g.setColor(Color.BLACK);
         g.drawRect(x, y, w, h);
 
-        // file name
         String name = fileName.substring(fileName.lastIndexOf('/') + 1);
         FontMetrics fm = g.getFontMetrics();
         String text = name;

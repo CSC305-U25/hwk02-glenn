@@ -16,11 +16,11 @@ import java.util.List;
  */
 
 public class MainPanel extends JPanel{
-    private JSplitPane splitPane;
 
     public MainPanel(Blackboard blackboard, JTextField selectedField, JLabel statusLabel) {
         super(new BorderLayout());
         Color bg = UIManager.getColor("Panel.background");
+        JSplitPane splitPane;
 
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setBorder(BorderFactory.createEmptyBorder());
@@ -38,9 +38,18 @@ public class MainPanel extends JPanel{
         relationsWrap.setBackground(bg);
         relationsWrap.add(relations, BorderLayout.CENTER);
 
+        JPanel centerDiagram = new JPanel(new GridBagLayout());
+        centerDiagram.add(diagram, new GridBagConstraints());
+
+        JScrollPane classDiagramScroll = new JScrollPane(centerDiagram);
+        classDiagramScroll.setBorder(BorderFactory.createEmptyBorder());
+        classDiagramScroll.getViewport().setBackground(bg);
+        //classDiagramScroll.getVerticalScrollBar().setUnitIncrement(8);
+        //classDiagramScroll.getHorizontalScrollBar().setUnitIncrement(8);
+
         JPanel classDiagramWrap = new JPanel(new BorderLayout());
         classDiagramWrap.setBackground(bg);
-        classDiagramWrap.add(diagram, BorderLayout.CENTER);
+        classDiagramWrap.add(classDiagramScroll, BorderLayout.CENTER);
 
         JPanel metricsWrap = new JPanel(new BorderLayout());
         metricsWrap.setBackground(bg);
@@ -97,6 +106,8 @@ public class MainPanel extends JPanel{
             board.setSquare(squares);
             board.repaint();
             statusLabel.setText("Scanned files: " + squares.size());
+
+            diagram.updateDiagram(bb.getFiles(), bb.getRelations(), bb);
         }));
     }
 }

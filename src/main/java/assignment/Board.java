@@ -2,11 +2,9 @@ package assignment;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.*;
 import java.awt.*;
 import javax.swing.*;
-import java.awt.event.*;
-import java.util.function.Consumer;
+
 
 /**
  * Visual grid board for displaying files as colored squares in a GUI.
