@@ -15,7 +15,7 @@ import java.util.List;
  * @version 5.0
  */
 
-public class MainPanel extends JPanel{
+public class MainPanel extends JPanel {
 
     public MainPanel(Blackboard blackboard, JTextField selectedField, JLabel statusLabel) {
         super(new BorderLayout());
@@ -44,8 +44,6 @@ public class MainPanel extends JPanel{
         JScrollPane classDiagramScroll = new JScrollPane(centerDiagram);
         classDiagramScroll.setBorder(BorderFactory.createEmptyBorder());
         classDiagramScroll.getViewport().setBackground(bg);
-        //classDiagramScroll.getVerticalScrollBar().setUnitIncrement(8);
-        //classDiagramScroll.getHorizontalScrollBar().setUnitIncrement(8);
 
         JPanel classDiagramWrap = new JPanel(new BorderLayout());
         classDiagramWrap.setBackground(bg);
@@ -101,7 +99,8 @@ public class MainPanel extends JPanel{
         blackboard.addObserver(bb -> EventQueue.invokeLater(() -> {
             List<Square> squares = new ArrayList<>();
             for (var f : bb.getFiles()) {
-                squares.add(new Square(f.name, f.lines));
+                boolean isFolder = f.lines == 0;
+                squares.add(new Square(f.name, f.lines, isFolder));
             }
             board.setSquare(squares);
             board.repaint();
