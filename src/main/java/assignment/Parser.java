@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 
 /**
  * Parses Java source files to extract class and relation information.
@@ -18,7 +19,9 @@ import com.github.javaparser.ast.CompilationUnit;
 public class Parser {
     private final Blackboard blackboard;
 
-    public Parser(Blackboard bb) { this.blackboard = bb; }
+    public Parser(Blackboard bb) {
+        this.blackboard = bb;
+    }
 
     public void parseAll(Map<String, String> sources) {
         Set<String> classNames = new LinkedHashSet<>();
@@ -34,7 +37,14 @@ public class Parser {
             }
         });
         List<ClassDesc> classes = new ArrayList<>();
-        for (String n : classNames) { classes.add(new ClassDesc(n)); }
+        for (CompilationUnit cu : cMap.values()) {
+            for (ClassOrInterfaceDeclaration decl : cu.findAll(ClassOrInterfaceDeclaration.class)) {
+                String n = decl.getNameAsString();
+                boolean isInterface = decl.isInterface();
+                boolean isAbstract = decl.isAbstract();
+                classes.add(new ClassDesc(n, isInterface, isAbstract));
+            }
+        }
 
         List<Relation> rel = new ArrayList<>();
         for (CompilationUnit c : cMap.values()) {
@@ -50,6 +60,7 @@ public class Parser {
             String key = r.src + "->" + r.dst + ":" + r.kind;
             if (seen.add(key))
                 out.add(r);
-        } return out;
+        }
+        return out;
     }
 }

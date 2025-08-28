@@ -11,6 +11,16 @@ package assignment;
 
 public class ClassDesc {
     public final String name;
+    public final boolean isInterface;
+    public final boolean isAbstract;
 
-    public ClassDesc(String name) { this.name = name; }
+    public ClassDesc(String name) {
+        this(name, false, false);
+    }
+
+    public ClassDesc(String name, boolean isInterface, boolean isAbstract) {
+        this.name = name;
+        this.isInterface = isInterface;
+        this.isAbstract = isAbstract;
+    }
 }
