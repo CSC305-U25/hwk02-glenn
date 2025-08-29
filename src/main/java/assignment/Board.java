@@ -5,8 +5,11 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Visual grid board for displaying files as colored squares in a GUI.
@@ -25,10 +28,12 @@ public class Board extends JPanel implements PropertyChangeListener{
     private final Blackboard bb;
     private ArrayList<Square> sq = new ArrayList<>();
     private int cols, rows;
+    private final Logger logger = LoggerFactory.getLogger(Board.class);
 
     public Board(Blackboard blackboard) {
         this.bb = blackboard;
         setOpaque(true);
+        logger.debug("Board Squares set: {}, grid {}x{}", sq.size(), cols, rows);
         sq = new ArrayList<>();
     }
 
@@ -50,6 +55,7 @@ public class Board extends JPanel implements PropertyChangeListener{
             int c = (int) Math.ceil((double) fileCount / r);
             if (r * c >= fileCount) { gridRow = r; gridCol = c; }
         }
+        logger.trace("calculated grid {}x{} for {} files", cols, rows, fileCount);
         cols = gridCol; rows = gridRow;
     }
 

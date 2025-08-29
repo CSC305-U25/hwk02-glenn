@@ -1,7 +1,11 @@
 package assignment;
 
 import java.awt.*;
+
 import javax.swing.*;
+
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * Entry point for the File Grid application.
@@ -14,59 +18,34 @@ import javax.swing.*;
  */
 
 public class Driver extends JFrame {
-    private final FileHandler fileHandler;
-    private final JLabel statusLabel = new JLabel("");
 
     public Driver() {
         super("Assignment");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+        Logger logger = LoggerFactory.getLogger(Driver.class);
 
         Blackboard blackboard = new Blackboard();
-        fileHandler = new FileHandler(blackboard);
+        FileHandler fileHandler = new FileHandler(blackboard);
 
-        TopPanel topPanel = new TopPanel(statusLabel);
+        TopPanel topPanel = new TopPanel();
         add(topPanel, BorderLayout.NORTH);
 
         JTextField selectedField = new JTextField();
-        MainPanel mainPanel = new MainPanel(blackboard, selectedField, statusLabel);
+        MainPanel mainPanel = new MainPanel(blackboard, selectedField);
         add(mainPanel, BorderLayout.CENTER);
 
         BottomPanel bottomPanel = new BottomPanel(selectedField);
         add(bottomPanel, BorderLayout.SOUTH);
 
-        topPanel.okButton.addActionListener(e -> loadFiles(topPanel.urlField, topPanel.okButton));
-        topPanel.urlField.addActionListener(e -> loadFiles(topPanel.urlField, topPanel.okButton));
+        GithubLoader.attach(topPanel.getOkButton(), topPanel.getUrlField(), fileHandler);
+
 
         setSize(1100, 800);
         setLocationRelativeTo(null);
         setVisible(true);
-    }
 
-    private void loadFiles(JTextField urlField, JButton okButton) {
-        String input = urlField.getText().trim();
-        if (input.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter a GitHub URL.");
-            return;
-        }
-
-        okButton.setEnabled(false);
-        urlField.setEnabled(false);
-        statusLabel.setText("Loading...");
-
-        Throwable error = null;
-        try {
-            fileHandler.fetchFromGithub(input);
-        } catch (Throwable t) {
-            error = t;
-        }
-        if (error == null) {
-            statusLabel.setText("Done.");
-        } else {
-            statusLabel.setText("Error.");
-        }
-        okButton.setEnabled(true);
-        urlField.setEnabled(true);
+        logger.info("UI initialized");
     }
 
     public static void main(String[] args) {

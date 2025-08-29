@@ -4,13 +4,12 @@ import javax.swing.*;
 import java.awt.*;
 
 public class TopPanel extends JPanel {
-    public final JTextField urlField = new JTextField();
-    public final JButton okButton = new JButton("OK");
-    public final JLabel statusLabel;
+    private final JTextField urlField = new JTextField();
+    private final JButton okButton = new JButton("OK");
 
-    public TopPanel(JLabel statusLabel) {
+    public TopPanel( ) {
         super(new BorderLayout(8, 8));
-        this.statusLabel = statusLabel;
+
         Color bg = UIManager.getColor("Panel.background");
         setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK),
@@ -27,9 +26,10 @@ public class TopPanel extends JPanel {
         JPanel urlWrap = new JPanel(new BorderLayout());
         urlWrap.add(urlLabel, BorderLayout.NORTH);
         urlWrap.add(urlRow, BorderLayout.CENTER);
-        urlWrap.add(statusLabel, BorderLayout.SOUTH);
         urlWrap.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
 
         add(urlWrap, BorderLayout.CENTER);
     }
+    public JTextField getUrlField()   { return urlField; }
+    public JButton   getOkButton()    { return okButton; }
 }

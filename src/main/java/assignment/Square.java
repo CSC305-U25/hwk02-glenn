@@ -2,6 +2,8 @@ package assignment;
 
 import java.awt.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Represents a single square in the grid board, containing file information.
  * Each square holds a filename, line count, and a color determined by the line
@@ -14,6 +16,8 @@ import java.awt.*;
  */
 
 public class Square {
+    private static final Logger logger = LoggerFactory.getLogger(Square.class);
+
     private final String fileName;
     private final int lineCount;
     private final Color color;
@@ -28,6 +32,8 @@ public class Square {
         this.lineCount = lineCount;
         this.isJava = isJava;
         this.color = setColor(lineCount, isJava);
+        logger.debug("Square created: file='{}', lines='{}',isJava='{}',color='{}'",
+            fileName, lineCount, isJava);
     }
 
     // Updated color logic
@@ -43,6 +49,8 @@ public class Square {
     }
 
     public void draw(Graphics g, int x, int y, int w, int h) {
+        logger.trace("Draw square '{}' at ({}, {}) {}x{}; isJava={}, color={}",
+                    fileName, x, y, w, h, isJava);
         // Square
         g.setColor(color);
         g.fillRect(x, y, w, h);
@@ -81,6 +89,7 @@ public class Square {
     }
 
     public static void drawEmpty(Graphics g, int x, int y, int w, int h) {
+        logger.trace("Draw empty square at ({}, {}) {}x{}", x, y, w, h);
         g.setColor(Color.WHITE);
         g.fillRect(x, y, w, h);
         g.setColor(Color.BLACK);

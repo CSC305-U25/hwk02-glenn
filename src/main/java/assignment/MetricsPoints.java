@@ -3,14 +3,27 @@ package assignment;
 import java.awt.*;
 import java.util.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+/**
+ * Computes and renders points for the "Abstractness vs Instability" metric plots.
+ * Only relations between classes contribute to in/out degrees.
+ *
+ * @author Glenn Anciado
+ * @author Oscar Chau
+ * @version 5.0
+ */
 public class MetricsPoints {
+    private static final Logger logger = LoggerFactory.getLogger(MetricsPoints.class);
     private MetricsPoints() {}
 
     public static Map<String, double[]> build(Blackboard bb){
         Set<String> allowed = new LinkedHashSet<>();
         for(FileInfo f : bb.getJavaFiles()) allowed.add(Names.baseName(f.name));
-        if(allowed.isEmpty()) return Collections.emptyMap();
-
+        if(allowed.isEmpty()) {
+            logger.debug("no allowed classes (No java files)");
+            return Collections.emptyMap();
+        }
         Map<String, Double> A = new HashMap<>();
         for(ClassDesc cd : bb.getClasses()){
             if (allowed.contains(cd.name)){
@@ -35,6 +48,7 @@ public class MetricsPoints {
 
             out.put(c, new double[]{instability, abstractness});
         }
+        logger.debug("Produced {} points (allowed={} clases)", out.size(), allowed.size());
         return out;
     }
 
@@ -52,6 +66,8 @@ public class MetricsPoints {
             g.fillOval(x - dotR, y - dotR, dotR * 2, dotR * 2);
             g.setColor(Color.BLACK);
             g.drawString(name, x + 6, y - 6);
+            logger.trace("Draw '{}' at ({}, {}) from instability={}, abstractness={}",
+                name, x, y, instability, abstractness);
         }
     }
 }

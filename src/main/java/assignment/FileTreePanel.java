@@ -1,14 +1,16 @@
 package assignment;
 
-import javax.swing.*;
-import javax.swing.tree.*;
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import javax.swing.*;
+import javax.swing.tree.*;
 
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 /**
  * Panel for displaying a file tree structure using a JTree.
  * Observes the Blackboard and updates the tree when file data changes.
@@ -17,9 +19,9 @@ import java.beans.PropertyChangeListener;
  * @author Oscar Chau
  * @version 5.0
  */
-
 public class FileTreePanel extends JPanel implements PropertyChangeListener{
     private final Blackboard bb;
+    private static final Logger logger = LoggerFactory.getLogger(FileTreePanel.class);
 
     public FileTreePanel(Blackboard blackboard) {
         super(new BorderLayout());
@@ -34,6 +36,7 @@ public class FileTreePanel extends JPanel implements PropertyChangeListener{
         JScrollPane scrollPane = new JScrollPane(tree);
 
         add(scrollPane, BorderLayout.CENTER);
+        logger.debug("FileTreePanel created");
         updateTree(bb.getFiles(), treeModel, tree, root);
 
         SwingUtilities.invokeLater(
@@ -69,6 +72,7 @@ public class FileTreePanel extends JPanel implements PropertyChangeListener{
         }
         treeModel.reload();
         for (int i = 0; i < tree.getRowCount(); i++) tree.expandRow(i);
+        logger.debug("Tree updated with {} files (rows={})", files.size(), tree.getRowCount());
     }
 
     @Override
@@ -81,6 +85,7 @@ public class FileTreePanel extends JPanel implements PropertyChangeListener{
     public void propertyChange(PropertyChangeEvent evt) {
         String p = evt.getPropertyName();
         if (p != null && !p.equals("files") && !p.equals("model")) return;
+        logger.debug("Tree Refresh triggered: {}", p);
         EventQueue.invokeLater(()-> {
             JTree tree = null;
             DefaultTreeModel model = null;

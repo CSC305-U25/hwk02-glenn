@@ -5,12 +5,23 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.type.Type;
-
-import java.util.*;
-
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+/**
+ * Extracts UML-Style realtions between Classes/Interfaceas from a parsed Java AST.
+ * Given a CompilationUnit and a set of allowed simple class names, the class
+ * connects classes/interface declaration to infer relationships.
+ *
+ * @author Glenn Anciado
+ * @author Oscar Chau
+ * @version 5.0
+ */
 public final class JavaRelationExtractor{
+    private static final Logger logger = LoggerFactory.getLogger(JavaRelationExtractor.class);
     private JavaRelationExtractor() {}
 
     public static Set<String> getClassNames(CompilationUnit cu) {
@@ -22,8 +33,10 @@ public final class JavaRelationExtractor{
 
     public static List<Relation> giveRelations(CompilationUnit cu, Set<String> allowed) {
         List<Relation> relations = new ArrayList<>();
-        for(ClassOrInterfaceDeclaration classDecl :
-                    cu.findAll(ClassOrInterfaceDeclaration.class)){
+        List<ClassOrInterfaceDeclaration> classDecls = cu.findAll(ClassOrInterfaceDeclaration.class);
+        logger.debug("Analyzing {} class/interface declarations with {} allowed names",
+                        classDecls.size(), allowed.size());
+        for(ClassOrInterfaceDeclaration classDecl : classDecls){
             String src = classDecl.getNameAsString();
             classDecl.getExtendedTypes().forEach(t ->
                 addRelations(relations, allowed, src, simple(t), Relation.Kind.INHERITANCE));
@@ -43,18 +56,18 @@ public final class JavaRelationExtractor{
             for (MethodDeclaration methodDecl : classDecl.getMethods()) {
                 methodDecl.getParameters().forEach(p ->
                     referencedTypeNames(p.getType()).forEach(name ->
-                        addRelations(relations, allowed, src, name, Relation.Kind.DEPENDENCY)));
+                    addRelations(relations, allowed, src, name, Relation.Kind.DEPENDENCY)));
                 methodDecl.getBody().ifPresent(body -> {
                     body.findAll(VariableDeclarationExpr.class).forEach(localVar ->
-                        referencedTypeNames(localVar.getElementType()).forEach(name ->
-                            addRelations(relations, allowed, src, name, Relation.Kind.ASSOCIATION)));
+                    referencedTypeNames(localVar.getElementType()).forEach(name ->
+                    addRelations(relations, allowed, src, name, Relation.Kind.ASSOCIATION)));
                 });
             }
 
             for(ConstructorDeclaration constructorDecl : classDecl.getConstructors()) {
                 constructorDecl.getParameters().forEach(p ->
                     referencedTypeNames(p.getType()).forEach(dst ->
-                        addRelations(relations, allowed, src, dst, Relation.Kind.DEPENDENCY)));
+                    addRelations(relations, allowed, src, dst, Relation.Kind.DEPENDENCY)));
                 constructorDecl.getBody().findAll(VariableDeclarationExpr.class).forEach(localVar ->
                     referencedTypeNames(localVar.getElementType()).forEach(dst ->
                     addRelations(relations, allowed, src, dst, Relation.Kind.ASSOCIATION)));
@@ -79,6 +92,7 @@ public final class JavaRelationExtractor{
 
         String text = type.asString();
         text = text.replace('@', ' ');
+        logger.trace("Scanning type text: {}", text);
         StringTokenizer tokens = new StringTokenizer(text, "<>,[]&()? .:$\t\r\n", false);
         Set<String> names = new LinkedHashSet<>();
         while(tokens.hasMoreTokens()){
@@ -87,10 +101,13 @@ public final class JavaRelationExtractor{
             String simple = Names.simpleType(token);
             if(!simple.isEmpty()) names.add(simple);
         }
+        logger.debug("Referenced types parsed: {}", names);
         return names;
     }
 
     private static String simple(Type t) {
-        return Names.simpleType(t.asString());
+        String s = Names.simpleType(t.asString());
+        logger.trace("Simple type of '{}' : {}", t, s);
+        return s;
     }
 }

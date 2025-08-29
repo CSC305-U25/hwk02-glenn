@@ -5,6 +5,8 @@ import java.util.*;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Parses Java source files to extract class and relation information.
  * Uses JavaParser to analyze source code and populate the Blackboard with
@@ -16,23 +18,31 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
  */
 
 public class Parser {
+    private static final Logger logger = LoggerFactory.getLogger(Parser.class);
     private final Blackboard blackboard;
 
     public Parser(Blackboard bb) {
         this.blackboard = bb;
+        logger.debug("Parser created");
     }
 
     public void parseAll(Map<String, String> sources) {
+        logger.debug("parseAll: parsing {} source(s)", sources.size());
         Set<String> classNames = new LinkedHashSet<>();
         Map<String, CompilationUnit> cMap = new LinkedHashMap<>();
 
         for(Map.Entry<String, String> e : sources.entrySet()) {
+            String key = e.getKey();
             try {
                 CompilationUnit cu = StaticJavaParser.parse(e.getValue());
-                cMap.put(e.getKey(), cu);
+                cMap.put(key, cu);
+                Set<String> names = JavaRelationExtractor.getClassNames(cu);
                 classNames.addAll(JavaRelationExtractor.getClassNames(cu));
+                logger.trace("Parsed '{}' -> {} class/interface declaration(s): {}",
+                    key, names.size(), names);
             } catch (Exception ex) {
-                System.err.println("Parse error in " + e.getKey() + ": " + ex.getMessage());
+                logger.warn("Parse error in '{}' : {}", key,
+                (ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName()), ex);
             }
         }
 
@@ -53,11 +63,17 @@ public class Parser {
             }
         }
         List<ClassDesc> classes = new ArrayList<>(classMap.values());
+        logger.debug("Collected {} unique classDesc entries (from {} parsed file(s))",
+            classes.size(), cMap.size());
         List<Relation> relations = new ArrayList<>();
         for (CompilationUnit c : cMap.values()) {
-            relations.addAll(JavaRelationExtractor.giveRelations(c, classNames));
+            List<Relation> rels = JavaRelationExtractor.giveRelations(c, classNames);
+            relations.addAll(rels);
+            logger.trace("Added {} relation(s) from a ocmpilation unit", rels.size());
         }
-        blackboard.setClassesAndRelations(classes, dedupe(relations));
+        List<Relation> deduped = dedupe(relations);
+        logger.debug("Relations: raw={}, deduped={}", relations.size(), deduped.size());
+        blackboard.setClassesAndRelations(classes, deduped);
     }
 
     private static List<Relation> dedupe(List<Relation> in) {

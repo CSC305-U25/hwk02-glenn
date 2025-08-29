@@ -4,6 +4,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Central data model for the application.
@@ -17,6 +19,7 @@ import java.util.*;
  */
 
 public class Blackboard implements PropertyChangeListener{
+    private static final Logger logger = LoggerFactory.getLogger(Blackboard.class);
     private final List<FileInfo> files = new ArrayList<>();
     private final List<ClassDesc> classes = new ArrayList<>();
     private final List<Relation> relations = new ArrayList<>();
@@ -24,20 +27,29 @@ public class Blackboard implements PropertyChangeListener{
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     public void addPropertyChangeListener(PropertyChangeListener l) {
-        if (l != null) pcs.addPropertyChangeListener(l);
+        if (l == null) return;
+        pcs.addPropertyChangeListener(l);
+        logger.trace("Listener added: {}", l.getClass().getSimpleName());
     }
     public void removePropertyChangeListener(PropertyChangeListener l) {
-        if (l != null) pcs.removePropertyChangeListener(l);
+        if (l == null) return;
+        pcs.removePropertyChangeListener(l);
+        logger.trace("Listener removed (all props): {}", l.getClass().getSimpleName());
     }
     public void addPropertyChangeListener(String prop, PropertyChangeListener l) {
-        if (l != null) pcs.addPropertyChangeListener(prop, l);
+        if (l == null) return;
+        pcs.addPropertyChangeListener(prop, l);
+        logger.trace("Listener added for '{}': {}", prop, l.getClass().getSimpleName());
     }
     public void removePropertyChangeListener(String prop, PropertyChangeListener l) {
-        if (l != null) pcs.removePropertyChangeListener(prop, l);
+        if (l == null) return;
+        pcs.removePropertyChangeListener(prop, l);
+        logger.trace("Listener removed for '{}': {}", prop, l.getClass().getSimpleName());
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
+        logger.trace("Forwarding property change: {}", evt.getPropertyName());
         pcs.firePropertyChange(evt);
     }
 

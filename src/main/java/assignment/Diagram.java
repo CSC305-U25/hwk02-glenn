@@ -1,9 +1,5 @@
 package assignment;
 
-import net.sourceforge.plantuml.FileFormat;
-import net.sourceforge.plantuml.FileFormatOption;
-import net.sourceforge.plantuml.SourceStringReader;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
@@ -11,13 +7,29 @@ import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.*;
 import javax.imageio.ImageIO;
 
+import net.sourceforge.plantuml.FileFormat;
+import net.sourceforge.plantuml.FileFormatOption;
+import net.sourceforge.plantuml.SourceStringReader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+/**
+ * Panel for displaying the UML diagram of the repository.
+ * Listens to property change from Blackboard and builds an updated UML model.
+ * Renders UML as a PNG image without temporary files.
+ *
+ * @author Glenn Anciado
+ * @author Oscar Chau
+ * @version 5.0
+ */
 public class Diagram extends JPanel implements PropertyChangeListener{
-    private Blackboard bb;
+    private final Blackboard bb;
     private BufferedImage image;
+    private static final Logger logger = LoggerFactory.getLogger(Diagram.class);
 
     public Diagram(Blackboard blackboard) {
         this.bb = blackboard;
@@ -28,9 +40,11 @@ public class Diagram extends JPanel implements PropertyChangeListener{
         try(ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             new SourceStringReader(uml).outputImage(os, new FileFormatOption(FileFormat.PNG));
             try(ByteArrayInputStream in = new ByteArrayInputStream(os.toByteArray())) {
+                logger.debug("PlantUML rendered");
                 return ImageIO.read(in);
             }
         } catch (Exception e) {
+            logger.error("failed to render UML image", e);
             return null;
         }
     }
@@ -52,6 +66,7 @@ public class Diagram extends JPanel implements PropertyChangeListener{
     public void addNotify() {
         super.addNotify();
         bb.addPropertyChangeListener(this);
+        logger.debug("Diagram attached; initial render");
         EventQueue.invokeLater(() -> {
             List<Square> squares = new ArrayList<>();
             for (FileInfo f : bb.getJavaFiles()) squares.add(new Square(f.name, f.lines));
@@ -65,6 +80,7 @@ public class Diagram extends JPanel implements PropertyChangeListener{
     @Override
     public void removeNotify() {
         bb.removePropertyChangeListener(this);
+        logger.trace("Diagram detached");
         super.removeNotify();
     }
 
@@ -72,8 +88,7 @@ public class Diagram extends JPanel implements PropertyChangeListener{
     public void propertyChange(PropertyChangeEvent evt) {
         String p = evt.getPropertyName();
         if (!"files".equals(p) && !"classes".equals(p) && !"relations".equals(p) && !"model".equals(p)) return;
-
-        // Re-render on model changes (inline, no helper)
+        logger.debug("Diagram model change: {}", p);
         EventQueue.invokeLater(() -> {
             List<Square> squares = new ArrayList<>();
             for (FileInfo f : bb.getJavaFiles()) squares.add(new Square(f.name, f.lines));

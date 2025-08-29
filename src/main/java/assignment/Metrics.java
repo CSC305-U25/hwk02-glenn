@@ -1,24 +1,39 @@
 package assignment;
 
-import javax.swing.JPanel;
-import javax.swing.UIManager;
-
 import java.awt.*;
 import java.util.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import javax.swing.JPanel;
+import javax.swing.UIManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Renders a simple metric plot for the project.
+ * Places the class in an "Abstractness vs Instability" plane with two zones.
+ * The zones are painful and useless, to visualize design quality.
+ * Listens to blackboard property chagnes to revalidate and repaint.
+ *
+ * @author Glenn Anciado
+ * @author Oscar Chau
+ * @version 5.0
+ */
 public class Metrics extends JPanel implements PropertyChangeListener{
+    private static final Logger logger = LoggerFactory.getLogger(Metrics.class);
     private final Blackboard bb;
 
     public Metrics(Blackboard blackboard) {
         this.bb = blackboard;
         setOpaque(true);
+        logger.debug("Metrics panel constructed.");
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        logger.trace("paintcomponent: Size={}x{}", getWidth(), getHeight());
 
         final int pad = 16, dotR = 4;
         Color bg = UIManager.getColor("Panel.background");
@@ -43,6 +58,8 @@ public class Metrics extends JPanel implements PropertyChangeListener{
         drawAxisLabels(g, plot, xName, yName);
 
         Map<String, double[]> pts = MetricsPoints.build(bb);
+        logger.debug("Rendering {} metric points",
+            (pts != null ? Integer.valueOf(pts.size()) : Integer.valueOf(0)));
         MetricsPoints.draw(g, plot, pts, dotR);
 
     }
@@ -105,17 +122,22 @@ public class Metrics extends JPanel implements PropertyChangeListener{
     @Override public void addNotify() {
         super.addNotify();
         bb.addPropertyChangeListener(this);
+        logger.debug("Metrics attached as PropertyChangeListener");
     }
 
     @Override public void removeNotify() {
         bb.removePropertyChangeListener(this);
+        logger.debug("Metrics detached as PropertyChangeListener");
         super.removeNotify();
     }
     @Override
     public void propertyChange(PropertyChangeEvent e) {
         String p = e.getPropertyName();
         if ("files".equals(p) || "classes".equals(p) || "relations".equals(p) || "model".equals(p)) {
+            logger.debug("Metric repaint triggered by property change: {}", p);
             revalidate(); repaint();
+        } else {
+            logger.trace("ignoring property change: {}", p);
         }
     }
 }

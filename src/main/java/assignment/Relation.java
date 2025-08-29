@@ -8,7 +8,6 @@ package assignment;
  * @author Oscar Chau
  * @version 5.0
  */
-
 public class Relation {
     public enum Kind {
         AGGREGATION, COMPOSITION, DEPENDENCY, INHERITANCE, IMPLEMENTATION, ASSOCIATION

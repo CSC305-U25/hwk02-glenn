@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Main content panel for the application.
  * Contains the split pane with the file tree and tabbed board/relations view,
@@ -17,12 +18,12 @@ import javax.swing.*;
  * @author Oscar Chau
  * @version 5.0
  */
-
 public class MainPanel extends JPanel implements PropertyChangeListener{
+    private static final Logger logger = LoggerFactory.getLogger(MainPanel.class);
     private final Blackboard bb;
     private final Board board;
 
-    public MainPanel(Blackboard blackboard, JTextField selectedField, JLabel statusLabel) {
+    public MainPanel(Blackboard blackboard, JTextField selectedField) {
         super(new BorderLayout());
         this.bb = blackboard;
         Color bg = UIManager.getColor("Panel.background");
@@ -92,7 +93,6 @@ public class MainPanel extends JPanel implements PropertyChangeListener{
         List<Square> squares = new ArrayList<>();
         for (var f : bb.getFiles()) squares.add(new Square(f.name, f.lines));
         board.setSquare(squares);
-        if (statusLabel != null) statusLabel.setText("Scanned files: " + squares.size());
     }
 
     private static JPanel wrap(Color bg, JComponent c) {
@@ -105,23 +105,28 @@ public class MainPanel extends JPanel implements PropertyChangeListener{
     @Override public void addNotify() {
         super.addNotify();
         bb.addPropertyChangeListener(this);
+        logger.debug("MainPanel attached as PropertyChangeListener");
     }
 
     @Override public void removeNotify() {
         bb.removePropertyChangeListener(this);
         super.removeNotify();
+        logger.debug("MainPanel detached as a PropertyChangeListener");
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         String p = evt.getPropertyName();
-        if ("files".equals(p) || "model".equals(p)) return;
-
+        if ("files".equals(p) || "model".equals(p)) {
+            logger.trace("Ignoring property change: {}", p);
+            return;
+        }
         EventQueue.invokeLater(() -> {
             List<Square> squares = new ArrayList<>();
             for(var f : bb.getFiles()) squares.add(new Square(f.name, f.lines));
             board.setSquare(squares);
             board.repaint();
+            logger.info("Board updated with {} files after property change: {}", squares.size(), p);
         });
     }
 }

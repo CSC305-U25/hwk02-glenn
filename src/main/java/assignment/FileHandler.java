@@ -4,6 +4,9 @@ import java.util.*;
 import javiergs.tulip.GitHubHandler;
 import javiergs.tulip.URLHelper;
 
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
 /**
  * Utility class for handling file operations and directory management.
  * Provides static methods for reading file names and line counts from GitHub
@@ -21,6 +24,7 @@ import javiergs.tulip.URLHelper;
 public class FileHandler {
     private final Blackboard bb;
     private final Parser parser;
+    private static final Logger logger = LoggerFactory.getLogger(FileHandler.class);
 
     public FileHandler(Blackboard bb) {
         this.bb = bb;
@@ -32,6 +36,8 @@ public class FileHandler {
     }
 
     public void fetchFromGithub(String repoUrl, FilePathFilter filter) throws Exception {
+        long t0 = System.nanoTime();
+        logger.info("Fetching from Github: {}", repoUrl);
         URLHelper uh = URLHelper.parseGitHubUrl(repoUrl);
         String token = TokenHelper.getToken();
         GitHubHandler gh = (token == null || token.isBlank())
@@ -66,6 +72,7 @@ public class FileHandler {
         }
         bb.setFiles(infos);
         parser.parseAll(sources);
+        logger.info("fetch complete ({} ms)", (System.nanoTime() - t0)/1_000_000);
     }
 
     private static void addFile(String path, String content, List<FileInfo> infos,
