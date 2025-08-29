@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
+import assignment.TextFieldErrorAppender;
 
 /**
  * Panel for displaying error messages at the bottom of the application.
@@ -47,5 +48,15 @@ public class BottomPanel extends JPanel {
         bottomWrap.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
 
         add(bottomWrap, BorderLayout.CENTER);
+    }
+
+    public void installErrorAppender() {
+        ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory
+                .getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+
+        TextFieldErrorAppender appender = new TextFieldErrorAppender(field);
+        appender.setName("BottomPanelErrorAppender");
+        appender.start();
+        rootLogger.addAppender(appender);
     }
 }

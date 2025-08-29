@@ -38,6 +38,8 @@ public class Driver extends JFrame {
         BottomPanel bottomPanel = new BottomPanel(selectedField);
         add(bottomPanel, BorderLayout.SOUTH);
 
+        bottomPanel.installErrorAppender();
+
         GithubLoader.attach(topPanel.getOkButton(), topPanel.getUrlField(), fileHandler);
 
         setSize(1100, 800);
