@@ -5,7 +5,6 @@ import java.util.*;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-
 /**
  * Parses Java source files to extract class and relation information.
  * Uses JavaParser to analyze source code and populate the Blackboard with
@@ -27,30 +26,38 @@ public class Parser {
         Set<String> classNames = new LinkedHashSet<>();
         Map<String, CompilationUnit> cMap = new LinkedHashMap<>();
 
-        sources.forEach((name, src) -> {
+        for(Map.Entry<String, String> e : sources.entrySet()) {
             try {
-                CompilationUnit cu = StaticJavaParser.parse(src);
-                cMap.put(name, cu);
+                CompilationUnit cu = StaticJavaParser.parse(e.getValue());
+                cMap.put(e.getKey(), cu);
                 classNames.addAll(JavaRelationExtractor.getClassNames(cu));
             } catch (Exception ex) {
-                System.err.println("Parse error in " + name + ": " + ex.getMessage());
-            }
-        });
-        List<ClassDesc> classes = new ArrayList<>();
-        for (CompilationUnit cu : cMap.values()) {
-            for (ClassOrInterfaceDeclaration decl : cu.findAll(ClassOrInterfaceDeclaration.class)) {
-                String n = decl.getNameAsString();
-                boolean isInterface = decl.isInterface();
-                boolean isAbstract = decl.isAbstract();
-                classes.add(new ClassDesc(n, isInterface, isAbstract));
+                System.err.println("Parse error in " + e.getKey() + ": " + ex.getMessage());
             }
         }
 
-        List<Relation> rel = new ArrayList<>();
-        for (CompilationUnit c : cMap.values()) {
-            rel.addAll(JavaRelationExtractor.giveRelations(c, classNames));
+        Map<String, ClassDesc> classMap = new LinkedHashMap<>();
+        for (CompilationUnit cu : cMap.values()) {
+            for (ClassOrInterfaceDeclaration d : cu.findAll(ClassOrInterfaceDeclaration.class)) {
+                String name = d.getNameAsString();
+                boolean isInterface = d.isInterface();
+                boolean isAbstract  = d.isAbstract();
+
+                ClassDesc prev = classMap.get(name);
+                classMap.put(name,
+                    (prev == null)
+                        ? new ClassDesc(name, isInterface, isAbstract)
+                        : new ClassDesc(name,
+                                        prev.isInterface || isInterface,
+                                        prev.isAbstract  || isAbstract));
+            }
         }
-        blackboard.setClassesAndRelations(classes, dedupe(rel));
+        List<ClassDesc> classes = new ArrayList<>(classMap.values());
+        List<Relation> relations = new ArrayList<>();
+        for (CompilationUnit c : cMap.values()) {
+            relations.addAll(JavaRelationExtractor.giveRelations(c, classNames));
+        }
+        blackboard.setClassesAndRelations(classes, dedupe(relations));
     }
 
     private static List<Relation> dedupe(List<Relation> in) {

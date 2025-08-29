@@ -5,14 +5,15 @@ import javax.swing.UIManager;
 
 import java.awt.*;
 import java.util.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-public class Metrics extends JPanel {
-    private final Blackboard blackboard;
+public class Metrics extends JPanel implements PropertyChangeListener{
+    private final Blackboard bb;
 
     public Metrics(Blackboard blackboard) {
-        this.blackboard = blackboard;
+        this.bb = blackboard;
         setOpaque(true);
-        blackboard.addObserver(bb -> { revalidate(); repaint(); });
     }
 
     @Override
@@ -41,7 +42,7 @@ public class Metrics extends JPanel {
 
         drawAxisLabels(g, plot, xName, yName);
 
-        Map<String, double[]> pts = MetricsPoints.build(blackboard);
+        Map<String, double[]> pts = MetricsPoints.build(bb);
         MetricsPoints.draw(g, plot, pts, dotR);
 
     }
@@ -99,5 +100,22 @@ public class Metrics extends JPanel {
         g.drawString(useless,
                     zone2x - uselessWidth / 2,
                     uselessBaseY);
+    }
+
+    @Override public void addNotify() {
+        super.addNotify();
+        bb.addPropertyChangeListener(this);
+    }
+
+    @Override public void removeNotify() {
+        bb.removePropertyChangeListener(this);
+        super.removeNotify();
+    }
+    @Override
+    public void propertyChange(PropertyChangeEvent e) {
+        String p = e.getPropertyName();
+        if ("files".equals(p) || "classes".equals(p) || "relations".equals(p) || "model".equals(p)) {
+            revalidate(); repaint();
+        }
     }
 }

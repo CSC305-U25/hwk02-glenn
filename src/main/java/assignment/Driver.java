@@ -14,7 +14,7 @@ import javax.swing.*;
  */
 
 public class Driver extends JFrame {
-    private FileHandler fileHandler;
+    private final FileHandler fileHandler;
     private final JLabel statusLabel = new JLabel("");
 
     public Driver() {

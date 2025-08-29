@@ -1,8 +1,9 @@
 package assignment;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.*;
 
 /**
  * Central data model for the application.
@@ -15,54 +16,54 @@ import java.util.function.*;
  * @version 5.0
  */
 
-public class Blackboard {
+public class Blackboard implements PropertyChangeListener{
     private final List<FileInfo> files = new ArrayList<>();
     private final List<ClassDesc> classes = new ArrayList<>();
     private final List<Relation> relations = new ArrayList<>();
-    private final List<Consumer<Blackboard>> observers = new CopyOnWriteArrayList<>();
 
-    public void addObserver(Consumer<Blackboard> obs) {
-        if (obs != null)
-            observers.add(obs);
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
+    public void addPropertyChangeListener(PropertyChangeListener l) {
+        if (l != null) pcs.addPropertyChangeListener(l);
+    }
+    public void removePropertyChangeListener(PropertyChangeListener l) {
+        if (l != null) pcs.removePropertyChangeListener(l);
+    }
+    public void addPropertyChangeListener(String prop, PropertyChangeListener l) {
+        if (l != null) pcs.addPropertyChangeListener(prop, l);
+    }
+    public void removePropertyChangeListener(String prop, PropertyChangeListener l) {
+        if (l != null) pcs.removePropertyChangeListener(prop, l);
     }
 
-    public void removeObserver(Consumer<Blackboard> obs) {
-        observers.remove(obs);
-    }
-
-    public void notifyObservers() {
-        for (var o : observers)
-            o.accept(this);
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        pcs.firePropertyChange(evt);
     }
 
     public void setFiles(Collection<FileInfo> list) {
+        var old = List.copyOf(files);
         files.clear();
-        if (list != null)
-            files.addAll(list);
-        notifyObservers();
+        if (list != null) files.addAll(list);
+        pcs.firePropertyChange("files", old, getFiles());
+        pcs.firePropertyChange("model", null, this);
     }
 
     public void setClassesAndRelations(Collection<ClassDesc> cs, Collection<Relation> rs) {
+        var oldC = List.copyOf(classes);
+        var oldR = List.copyOf(relations);
         classes.clear();
         relations.clear();
-        if (cs != null)
-            classes.addAll(cs);
-        if (rs != null)
-            relations.addAll(rs);
-        notifyObservers();
+        if (cs != null) classes.addAll(cs);
+        if (rs != null) relations.addAll(rs);
+        pcs.firePropertyChange("classes", oldC, getClasses());
+        pcs.firePropertyChange("relations", oldR, getRelations());
+        pcs.firePropertyChange("model", null, this);
     }
 
-    public List<FileInfo> getFiles() {
-        return List.copyOf(files);
-    }
-
-    public List<ClassDesc> getClasses() {
-        return List.copyOf(classes);
-    }
-
-    public List<Relation> getRelations() {
-        return List.copyOf(relations);
-    }
+    public List<FileInfo> getFiles() { return List.copyOf(files); }
+    public List<ClassDesc> getClasses() { return List.copyOf(classes); }
+    public List<Relation> getRelations() { return List.copyOf(relations); }
 
     public List<FileInfo> getJavaFiles() {
         List<FileInfo> onlyJava = new ArrayList<>();

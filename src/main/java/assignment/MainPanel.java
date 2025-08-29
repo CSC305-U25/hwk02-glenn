@@ -1,9 +1,12 @@
 package assignment;
 
-import javax.swing.*;
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.*;
+
 
 /**
  * Main content panel for the application.
@@ -15,43 +18,34 @@ import java.util.List;
  * @version 5.0
  */
 
-public class MainPanel extends JPanel {
+public class MainPanel extends JPanel implements PropertyChangeListener{
+    private final Blackboard bb;
+    private final Board board;
 
     public MainPanel(Blackboard blackboard, JTextField selectedField, JLabel statusLabel) {
         super(new BorderLayout());
+        this.bb = blackboard;
         Color bg = UIManager.getColor("Panel.background");
-        JSplitPane splitPane;
 
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setBorder(BorderFactory.createEmptyBorder());
 
-        Board board = new Board();
+        board = new Board(blackboard);
         Relations relations = new Relations(blackboard);
         Diagram diagram = new Diagram(blackboard);
         Metrics metrics = new Metrics(blackboard);
 
-        JPanel boardWrap = new JPanel(new BorderLayout());
-        boardWrap.setBackground(bg);
-        boardWrap.add(board, BorderLayout.CENTER);
-
-        JPanel relationsWrap = new JPanel(new BorderLayout());
-        relationsWrap.setBackground(bg);
-        relationsWrap.add(relations, BorderLayout.CENTER);
 
         JPanel centerDiagram = new JPanel(new GridBagLayout());
         centerDiagram.add(diagram, new GridBagConstraints());
-
         JScrollPane classDiagramScroll = new JScrollPane(centerDiagram);
         classDiagramScroll.setBorder(BorderFactory.createEmptyBorder());
         classDiagramScroll.getViewport().setBackground(bg);
 
-        JPanel classDiagramWrap = new JPanel(new BorderLayout());
-        classDiagramWrap.setBackground(bg);
-        classDiagramWrap.add(classDiagramScroll, BorderLayout.CENTER);
-
-        JPanel metricsWrap = new JPanel(new BorderLayout());
-        metricsWrap.setBackground(bg);
-        metricsWrap.add(metrics, BorderLayout.CENTER);
+        JPanel boardWrap = wrap(bg, board);
+        JPanel relationsWrap = wrap(bg, relations);
+        JPanel classDiagramWrap = wrap(bg, classDiagramScroll);
+        JPanel metricsWrap = wrap(bg, metrics);
 
         FileTreePanel treeWrap = new FileTreePanel(blackboard);
         treeWrap.setBackground(bg);
@@ -94,19 +88,40 @@ public class MainPanel extends JPanel {
         bottomPanel.add(bottomWrap, BorderLayout.CENTER);
 
         add(splitPane, BorderLayout.CENTER);
-        add(bottomPanel, BorderLayout.SOUTH);
 
-        blackboard.addObserver(bb -> EventQueue.invokeLater(() -> {
+        List<Square> squares = new ArrayList<>();
+        for (var f : bb.getFiles()) squares.add(new Square(f.name, f.lines));
+        board.setSquare(squares);
+        if (statusLabel != null) statusLabel.setText("Scanned files: " + squares.size());
+    }
+
+    private static JPanel wrap(Color bg, JComponent c) {
+        JPanel p = new JPanel(new BorderLayout());
+        p.setBackground(bg);
+        p.add(c, BorderLayout.CENTER);
+        return p;
+    }
+
+    @Override public void addNotify() {
+        super.addNotify();
+        bb.addPropertyChangeListener(this);
+    }
+
+    @Override public void removeNotify() {
+        bb.removePropertyChangeListener(this);
+        super.removeNotify();
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        String p = evt.getPropertyName();
+        if ("files".equals(p) || "model".equals(p)) return;
+
+        EventQueue.invokeLater(() -> {
             List<Square> squares = new ArrayList<>();
-            for (var f : bb.getFiles()) {
-                boolean isFolder = f.lines == 0;
-                squares.add(new Square(f.name, f.lines, isFolder));
-            }
+            for(var f : bb.getFiles()) squares.add(new Square(f.name, f.lines));
             board.setSquare(squares);
             board.repaint();
-            statusLabel.setText("Scanned files: " + squares.size());
-
-            diagram.updateDiagram(bb.getFiles(), bb.getRelations(), bb);
-        }));
+        });
     }
 }

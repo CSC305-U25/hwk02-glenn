@@ -3,6 +3,9 @@ package assignment;
 import java.util.*;
 import java.util.List;
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import javax.swing.*;
 
 /**
@@ -15,75 +18,81 @@ import javax.swing.*;
  * @version 5.0
  */
 
-public class Relations extends JPanel {
+public class Relations extends JPanel implements PropertyChangeListener{
     private final Blackboard bb;
 
     public Relations(Blackboard blackboard) {
         this.bb = blackboard;
         setOpaque(true);
-        blackboard.addObserver(b -> {
+    }
+
+    @Override public void addNotify(){
+        super.addNotify();
+        bb.addPropertyChangeListener(this);
+    }
+
+    @Override
+    public void removeNotify() {
+        bb.removePropertyChangeListener(this);
+        super.removeNotify();
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        String p = evt.getPropertyName();
+        if("files".equals(p) || "classes".equals(p) || "relations".equals(p)
+            || "model".equals(p)) {
             revalidate();
             repaint();
-        });
+        }
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        Map<String, FileInfo> fileInfoMap = new HashMap<>();
-        for (FileInfo f : bb.getFiles()) {
-            String cls = Names.baseName(f.name);
-            fileInfoMap.put(cls, f);
-        }
-
         Set<String> allowed = new LinkedHashSet<>();
+        Map<String,Integer> linesByClass = new HashMap<>();
         for (FileInfo f : bb.getJavaFiles()) {
-            String cls = Names.baseName(f.name);
-            allowed.add(cls);
+            String base = Names.baseName(f.name);
+            allowed.add(base);
+            linesByClass.put(base, f.lines);
         }
+        if (allowed.isEmpty()) return;
+
+        var classIsJava = JavaFilter.forClasses(bb.getJavaFiles());
         List<ClassDesc> classes = new ArrayList<>();
         for (ClassDesc c : bb.getClasses()) {
-            if (allowed.contains(c.name))
-                classes.add(c);
+            if(classIsJava.test(c)) classes.add(c);
         }
-        if (classes.isEmpty())
-            return;
+        if (classes.isEmpty()) return;
 
         Map<String, Rectangle> boxes = layoutCircle(getWidth(), getHeight(),
                 classes, 90, 40);
-        g.setColor(UIManager.getColor("Panel.bsackground"));
 
+        g.setColor(Color.BLACK);
         for (Relation r : bb.getRelations()) {
-            if (!allowed.contains(r.src) || !allowed.contains(r.dst))
-                continue;
+            if (!allowed.contains(r.src) || !allowed.contains(r.dst)) continue;
             Rectangle a = boxes.get(r.src), b = boxes.get(r.dst);
-            if (a == null || b == null)
-                continue;
+            if (a == null || b == null) continue;
             g.drawLine(a.x + a.width / 2, a.y + a.height / 2,
-                    b.x + b.width / 2, b.y + b.height / 2);
+                        b.x + b.width / 2, b.y + b.height / 2);
         }
+
         for (ClassDesc c : classes) {
-            Rectangle r = boxes.get(c.name);
-            if (r != null) {
-                FileInfo f = fileInfoMap.get(c.name);
-                if (f != null) {
-                    boolean isFolder = f.lines == 0;
-                    new Square(f.name, f.lines, isFolder).draw(g, r.x, r.y, r.width, r.height);
-                } else {
-                    new Square(c.name, 0).draw(g, r.x, r.y, r.width, r.height);
-                }
+            Rectangle rect = boxes.get(c.name);
+            if (rect != null) {
+                int lines = linesByClass.getOrDefault(c.name, 0);
+                new Square(c.name, lines, true).draw(g, rect.x, rect.y, rect.width, rect.height);
             }
         }
     }
 
     private static Map<String, Rectangle> layoutCircle(
             int panelW, int panelH, List<ClassDesc> classes, int w, int h) {
-
         Map<String, Rectangle> out = new HashMap<>(classes.size() * 2);
         int n = classes.size();
-        if (n == 0)
-            return out;
+        if (n == 0) return out;
 
         int cx = panelW / 2, cy = panelH / 2;
         int radius = Math.max(0, Math.min(panelW, panelH) / 2 - w);

@@ -11,7 +11,7 @@ package assignment;
 
 public class Relation {
     public enum Kind {
-        AGGREGATION, COMPOSITION, DEPENDENCY, INHERITANCE, IMPLEMENTATION
+        AGGREGATION, COMPOSITION, DEPENDENCY, INHERITANCE, IMPLEMENTATION, ASSOCIATION
     }
 
     public final String src, dst;
@@ -28,12 +28,12 @@ public class Relation {
     public Kind getKind() { return kind; }
 
     public String plantUmlArrow() {
-        return switch (kind) {
-            case AGGREGATION    -> " o-- ";
-            case COMPOSITION    -> " *-- ";
-            case DEPENDENCY     -> " ..> ";
-            case INHERITANCE    -> " <|-- ";
-            case IMPLEMENTATION -> " <|.. ";
-        };
+        if (kind == Relation.Kind.AGGREGATION)    return " o-- ";
+        if (kind == Relation.Kind.COMPOSITION)    return " *-- ";
+        if (kind == Relation.Kind.DEPENDENCY)     return " ..> ";
+        if (kind == Relation.Kind.INHERITANCE)    return " <|-- ";
+        if (kind == Relation.Kind.IMPLEMENTATION) return " <|.. ";
+        if (kind == Relation.Kind.ASSOCIATION) return " --> ";
+        return " ..> ";
     }
 }

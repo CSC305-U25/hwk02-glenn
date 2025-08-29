@@ -3,60 +3,94 @@ package assignment;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.*;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.type.Type;
 
 import java.util.*;
 
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
+
 public final class JavaRelationExtractor{
     private JavaRelationExtractor() {}
 
     public static Set<String> getClassNames(CompilationUnit cu) {
-        Set<String> out = new LinkedHashSet<>();
-        cu.findAll(ClassOrInterfaceDeclaration.class).forEach(c -> out.add(c.getNameAsString()));
-        return out;
+        Set<String> classNames  = new LinkedHashSet<>();
+        cu.findAll(ClassOrInterfaceDeclaration.class)
+                .forEach(c -> classNames .add(c.getNameAsString()));
+        return classNames;
     }
 
     public static List<Relation> giveRelations(CompilationUnit cu, Set<String> allowed) {
-        List<Relation> out = new ArrayList<>();
-        for(ClassOrInterfaceDeclaration c : cu.findAll(ClassOrInterfaceDeclaration.class)){
-            String src = c.getNameAsString();
+        List<Relation> relations = new ArrayList<>();
+        for(ClassOrInterfaceDeclaration classDecl :
+                    cu.findAll(ClassOrInterfaceDeclaration.class)){
+            String src = classDecl.getNameAsString();
+            classDecl.getExtendedTypes().forEach(t ->
+                addRelations(relations, allowed, src, simple(t), Relation.Kind.INHERITANCE));
 
-            c.getExtendedTypes().forEach(t -> add(out, allowed, src, simple(t), Relation.Kind.INHERITANCE));
-            c.getImplementedTypes().forEach(t -> add(out, allowed, src, simple(t), Relation.Kind.IMPLEMENTATION));
+            classDecl.getImplementedTypes().forEach(t ->
+                addRelations(relations, allowed, src, simple(t), Relation.Kind.IMPLEMENTATION));
 
-            for(FieldDeclaration f : c.getFields()) {
-                add(out, allowed, src, simple(f.getElementType()),
-                    f.isFinal() ? Relation.Kind.COMPOSITION : Relation.Kind.AGGREGATION);
+            for(FieldDeclaration fieldDecl : classDecl.getFields()) {
+                for(String typeName : referencedTypeNames(fieldDecl.getElementType())) {
+                    addRelations(relations, allowed, src, typeName,
+                            fieldDecl.isFinal()
+                                     ? Relation.Kind.COMPOSITION
+                                     : Relation.Kind.AGGREGATION);
+                }
             }
 
-            for (MethodDeclaration m : c.getMethods()) {
-                m.getParameters().forEach(p ->
-                            add(out, allowed, src, simple(p.getType()), Relation.Kind.DEPENDENCY));
-                m.getBody().ifPresent(b -> {
-                    b.findAll(VariableDeclarationExpr.class).forEach(v ->
-                            add(out, allowed, src, simple(v.getElementType()), Relation.Kind.DEPENDENCY));
-                    b.findAll(ObjectCreationExpr.class).forEach(n ->
-                            add(out, allowed, src, simple(n.getType()), Relation.Kind.DEPENDENCY));
+            for (MethodDeclaration methodDecl : classDecl.getMethods()) {
+                methodDecl.getParameters().forEach(p ->
+                    referencedTypeNames(p.getType()).forEach(name ->
+                        addRelations(relations, allowed, src, name, Relation.Kind.DEPENDENCY)));
+                methodDecl.getBody().ifPresent(body -> {
+                    body.findAll(VariableDeclarationExpr.class).forEach(localVar ->
+                        referencedTypeNames(localVar.getElementType()).forEach(name ->
+                            addRelations(relations, allowed, src, name, Relation.Kind.ASSOCIATION)));
                 });
             }
+
+            for(ConstructorDeclaration constructorDecl : classDecl.getConstructors()) {
+                constructorDecl.getParameters().forEach(p ->
+                    referencedTypeNames(p.getType()).forEach(dst ->
+                        addRelations(relations, allowed, src, dst, Relation.Kind.DEPENDENCY)));
+                constructorDecl.getBody().findAll(VariableDeclarationExpr.class).forEach(localVar ->
+                    referencedTypeNames(localVar.getElementType()).forEach(dst ->
+                    addRelations(relations, allowed, src, dst, Relation.Kind.ASSOCIATION)));
+                constructorDecl.getBody().findAll(ObjectCreationExpr.class).forEach(newExpr ->
+                    referencedTypeNames(newExpr.getType()).forEach(dst ->
+                    addRelations(relations, allowed, src, dst, Relation.Kind.DEPENDENCY)));
+            }
         }
-        return out;
+        return relations;
     }
 
-    private static void add(List<Relation> out, Set<String> allowed, String src, String dst, Relation.Kind k) {
+    private static void addRelations(List<Relation> out, Set<String> allowed, String src,
+                            String dst, Relation.Kind k) {
         if (dst == null || src.equals(dst) || !allowed.contains(dst)) return;
         out.add(new Relation(src, dst, k));
     }
 
+    private static Set<String> referencedTypeNames(Type type) {
+        Set<String> keywords = Set.of("extends", "super");
+        Set<String> primitives = Set.of("void", "boolean", "byte", "short",
+                "int", "long", "char", "float", "double");
+
+        String text = type.asString();
+        text = text.replace('@', ' ');
+        StringTokenizer tokens = new StringTokenizer(text, "<>,[]&()? .:$\t\r\n", false);
+        Set<String> names = new LinkedHashSet<>();
+        while(tokens.hasMoreTokens()){
+            String token = tokens.nextToken();
+            if(primitives.contains(token) || keywords.contains(token)) continue;
+            String simple = Names.simpleType(token);
+            if(!simple.isEmpty()) names.add(simple);
+        }
+        return names;
+    }
+
     private static String simple(Type t) {
-        String s = t.asString();
-        int lt = s.indexOf('<');
-        if (lt >= 0) s = s.substring(0, lt);
-        while(s.endsWith("[]")) s = s.substring(0, s.length() - 2);
-        int dot = s.lastIndexOf('.');
-        if(dot >= 0 && dot + 1 < s.length()) s = s.substring(dot + 1);
-        return s;
+        return Names.simpleType(t.asString());
     }
 }

@@ -29,11 +29,25 @@ public class Names {
     }
 
     public static String baseName(String fileName) {
-        String name = fileName;
-        int slash = Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\'));
-        if(slash >= 0) name = name.substring(slash + 1);
+        if (fileName == null || fileName.isEmpty()) return "";
+        String path = fileName.replace('\\', '/');
+        while(path.endsWith("/")) path = path.substring(0, path.length() - 1);
+        int slash = path.lastIndexOf('/');
+        String name = (slash >= 0) ? path.substring(slash + 1) : path;
+
         int dot = name.lastIndexOf('.');
         if (dot > 0) name = name.substring(0, dot);
         return name;
+    }
+
+    public static String simpleType(String typeName) {
+        if(typeName == null || typeName.isEmpty()) return "";
+        String s = typeName;
+        int lt = s.indexOf('<');
+        if(lt >= 0) s = s.substring(0, lt);
+        while(s.endsWith("]")) s = s.substring(0, s.length() - 2);
+        int dot = s.lastIndexOf('.');
+        if(dot >= 0 && dot + 1 < s.length()) s = s.substring(dot + 1);
+        return s;
     }
 }

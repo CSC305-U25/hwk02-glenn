@@ -1,8 +1,10 @@
 package assignment;
 
+import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.awt.*;
 import javax.swing.*;
 
 
@@ -18,12 +20,14 @@ import javax.swing.*;
  * @version 5.0
  */
 
-public class Board extends JPanel{
+public class Board extends JPanel implements PropertyChangeListener{
 
+    private final Blackboard bb;
     private ArrayList<Square> sq = new ArrayList<>();
     private int cols, rows;
 
-    public Board() {
+    public Board(Blackboard blackboard) {
+        this.bb = blackboard;
         setOpaque(true);
         sq = new ArrayList<>();
     }
@@ -49,28 +53,26 @@ public class Board extends JPanel{
         cols = gridCol; rows = gridRow;
     }
 
+    private void refreshFromModel() {
+        List<Square> list = new ArrayList<>();
+        for(FileInfo f : bb.getFiles()) {
+            list.add(new Square(f.name + ".java", f.lines, JavaFilter.INSTANCE.test(f)));
+        }
+        setSquare(list);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        ArrayList<Rectangle> cellBound = new ArrayList<>();
-        cellBound.clear();
+        if (sq == null || sq.isEmpty() || cols == 0 || rows == 0) { return; }
 
-        calculateSize();
-
-        if (sq == null || sq.isEmpty() || cols == 0 || rows == 0) {
-            return;
-        }
-
-        int w = getWidth() / cols;
-        int h = getHeight() / rows;
+        int w = getWidth() / cols, h = getHeight() / rows;
 
         int index = 0;
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
                 int drawX = y * w;
                 int drawY = x * h;
-                cellBound.add(new Rectangle(drawX, drawY, w, h));
-
                 if (index < sq.size()) {
                     sq.get(index).draw(g, drawX, drawY, w, h);
                 } else {
@@ -78,6 +80,27 @@ public class Board extends JPanel{
                 }
                 index++;
             }
+        }
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        bb.addPropertyChangeListener(this);
+        refreshFromModel();
+    }
+
+    @Override
+    public void removeNotify() {
+        bb.removePropertyChangeListener(this);
+        super.removeNotify();
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        String p = evt.getPropertyName();
+        if("files".equals(p) || "model".equals(p)) {
+            SwingUtilities.invokeLater(this::refreshFromModel);
         }
     }
 }

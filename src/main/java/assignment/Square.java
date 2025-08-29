@@ -17,34 +17,25 @@ public class Square {
     private final String fileName;
     private final int lineCount;
     private final Color color;
-    private final boolean isFolder;
+    private final boolean isJava;
 
     public Square(String fileName, int lineCount) {
         this(fileName, lineCount, false);
     }
 
-    public Square(String fileName, int lineCount, boolean isFolder) {
+    public Square(String fileName, int lineCount, boolean isJava) {
         this.fileName = fileName;
         this.lineCount = lineCount;
-        this.isFolder = isFolder;
-        this.color = setColor(fileName, lineCount, isFolder);
+        this.isJava = isJava;
+        this.color = setColor(lineCount, isJava);
     }
 
     // Updated color logic
-    private static Color setColor(String fileName, int lines, boolean isFolder) {
-        if (isFolder) {
-            return Color.LIGHT_GRAY;
-        }
-        if (!fileName.endsWith(".java")) {
-            return Color.LIGHT_GRAY;
-        }
-        if (lines < 10) {
-            return Color.GREEN;
-        } else if (lines < 20) {
-            return Color.YELLOW;
-        } else {
-            return Color.RED;
-        }
+    private static Color setColor(int lines, boolean isJava) {
+        if (!isJava) { return Color.LIGHT_GRAY; }
+        if (lines < 10) { return Color.GREEN; }
+        else if (lines < 20) { return Color.YELLOW; }
+        else { return Color.RED; }
     }
 
     public String getFileName() {
@@ -57,7 +48,7 @@ public class Square {
         g.fillRect(x, y, w, h);
 
         // Folder bar
-        if (isFolder) {
+        if (!isJava) {
             int barHeight = Math.max(4, h / 10);
             int halfW = w / 2;
             g.setColor(Color.BLACK);
@@ -67,7 +58,7 @@ public class Square {
         }
 
         // White triangle for non-java files
-        if (!isFolder && !fileName.endsWith(".java")) {
+        if (!isJava && !fileName.endsWith(".java")) {
             int[] tx = { x + w, x + w, x + w - w / 3 };
             int[] ty = { y + h, y + h - h / 3, y + h };
             g.setColor(Color.WHITE);
@@ -80,7 +71,8 @@ public class Square {
         g.setColor(Color.BLACK);
         g.drawRect(x, y, w, h);
 
-        String name = fileName.substring(fileName.lastIndexOf('/') + 1);
+        String name = Names.baseName(fileName);
+
         FontMetrics fm = g.getFontMetrics();
         String text = name;
         int tx = x + (w - fm.stringWidth(text)) / 2;
