@@ -1,8 +1,10 @@
 package assignment;
 
 import javax.swing.JPanel;
+import javax.swing.UIManager;
+
 import java.awt.*;
-import java.util.List;
+import java.util.*;
 
 public class Metrics extends JPanel {
     private final Blackboard blackboard;
@@ -10,82 +12,92 @@ public class Metrics extends JPanel {
     public Metrics(Blackboard blackboard) {
         this.blackboard = blackboard;
         setOpaque(true);
-        blackboard.addObserver(bb -> repaint());
+        blackboard.addObserver(bb -> { revalidate(); repaint(); });
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        final int pad = 16, dotR = 4;
+        Color bg = UIManager.getColor("Panel.background");
+        Color plotColor = new Color(160, 248, 172);
 
-        Color paraGreen = new Color(160, 248, 172);
-        g2.setColor(paraGreen);
-        g2.fillRect(0, 0, getWidth(), getHeight());
+        FontMetrics fm = g.getFontMetrics();
+        final String xName = "Instablity", yName=  "Abstractness";
+        int axisGap = Math.max(24, fm.stringWidth(yName) + 10);
 
-        int w = getWidth();
-        int h = getHeight();
+        g.setColor(bg);
+        g.fillRect(0, 0, getWidth(), getHeight());
 
-        int x0 = 40, y0 = h - 40;
-        int x1 = w - 10, y1 = 10;
+        Rectangle plot = plotBounds(getWidth(), getHeight(), pad, axisGap);
+        g.setColor(plotColor);
+        g.fillRect(plot.x, plot.y, plot.width, plot.height);
 
-        g2.setColor(Color.BLACK);
-        g2.drawLine(x0, y0, x1, y0);
-        g2.drawLine(x0, y0, x0, y1);
-        g2.drawLine(x0, y1, x1, y1);
-        g2.drawLine(x1, y1, x1, y0);
+        drawZones(g, plot);
 
-        g2.setColor(Color.BLACK);
-        g2.drawString("Instability", (x0 + x1) / 2, h - 12);
-        g2.drawString("Abstractness", 6, (y0 + y1) / 2);
+        g.setColor(Color.BLACK);
+        g.drawRect(plot.x, plot.y, plot.width, plot.height);
 
-        Shape oldClip = g2.getClip();
-        Rectangle plot = new Rectangle(x0, y1, (x1 - x0), (y0 - y1));
-        g2.setClip(plot);
-        int r = Math.min(w, h) / 3;
+        drawAxisLabels(g, plot, xName, yName);
 
-        g2.setColor(Color.WHITE);
-        g2.drawLine(x0, y1, x1, y0);
-        g2.fillOval(x0 - r, y0 - r, 2 * r, 2 * r);
-        g2.fillOval(x1 - r, y1 - r, 2 * r, 2 * r);
-        g2.setColor(Color.BLACK);
-        g2.drawString("Useless", x1 - 90, y1 + 90);
-        g2.drawString("Painful", x0 + 70, y0 - 90);
-        g2.setClip(oldClip);
+        Map<String, double[]> pts = MetricsPoints.build(blackboard);
+        MetricsPoints.draw(g, plot, pts, dotR);
 
-        // Files
-        List<FileInfo> files = blackboard.getFiles();
-        List<ClassDesc> classes = blackboard.getClasses();
+    }
 
-        java.util.Map<String, Double> abstractnessMap = new java.util.HashMap<>();
-        for (FileInfo file : files) {
-            String base = Names.baseName(file.name);
-            boolean isAbs = false;
-            for (ClassDesc cd : classes) {
-                if (cd.name.equals(base) && (cd.isInterface || cd.isAbstract)) {
-                    isAbs = true;
-                    break;
-                }
-            }
-            abstractnessMap.put(base, isAbs ? 1.0 : 0.0);
-        }
+    private static Rectangle plotBounds(int w, int h, int pad, int axisGap) {
+        int x = pad + axisGap;
+        int y = pad;
+        int pw = Math.max(1, w - x - pad);
+        int ph = Math.max(1, h - y-  pad - axisGap);
+        return new Rectangle(x, y, pw, ph);
+    }
 
-        for (FileInfo file : files) {
-            String base = Names.baseName(file.name);
-            int in = blackboard.getIncomingRelationCount(file.name);
-            int out = blackboard.getOutgoingRelationCount(file.name);
-            double instability = (in + out) == 0 ? 0 : (double) out / (in + out);
-            double abstractness = abstractnessMap.getOrDefault(base, 0.0);
+    private static void drawAxisLabels(Graphics g, Rectangle p, String xName, String yName){
+        FontMetrics fm = g.getFontMetrics();
+        g.setColor(Color.BLACK);
+        g.drawString(xName,
+                    p.x + (p.width - fm.stringWidth(xName)) / 2,
+                    p.y + p.height + fm.getAscent() + 6);
+        g.drawString(yName,
+                    p.x - fm.stringWidth(yName) - 8,
+                    p.y + (p.height + fm.getAscent()) / 2);
+    }
 
-            int x = (int) (x0 + instability * (x1 - x0));
-            int y = (int) (y0 - abstractness * (y0 - y1));
+    private static void drawZones(Graphics g, Rectangle p) {
+        Rectangle oldClip = g.getClipBounds();
+        g.setClip(p.x, p.y, p.width, p.height);
 
-            g2.setColor(Color.BLUE);
-            g2.fillOval(x - 4, y - 4, 8, 8);
+        g.setColor(Color.WHITE);
+        g.drawLine(p.x, p.y, p.x + p.width, p.y + p.height);
 
-            g2.setColor(Color.BLACK);
-            g2.drawString(base, x + 6, y - 6);
-        }
+        int r = (int)Math.round(Math.min(p.width, p.height) * 0.45);
+
+        g.fillOval(p.x - r, p.y + p.height - r, 2 * r, 2 * r);
+        g.fillOval(p.x + p.width - r, p.y - r, 2 * r, 2 * r);
+
+        g.setClip(oldClip);
+        g.setColor(Color.BLACK);
+        FontMetrics fm = g.getFontMetrics();
+
+        String painful = "Painful";
+        int zone1x = p.x + r / 2;
+        int zone1y = p.y + p.height - r / 2;
+        int painfulWidth = fm.stringWidth(painful);
+        int painfulBaseY = zone1y + (fm.getAscent() - fm.getDescent()) / 2;
+        g.drawString(painful,
+                    zone1x - painfulWidth / 2,
+                    painfulBaseY);
+
+        String useless = "Useless";
+        int zone2x = p.x + p.width - r / 2;
+        int zone2y = p.y + r / 2;
+
+        int uselessWidth = fm.stringWidth(useless);
+        int uselessBaseY = zone2y + (fm.getAscent() - fm.getDescent()) / 2;
+        g.drawString(useless,
+                    zone2x - uselessWidth / 2,
+                    uselessBaseY);
     }
 }
