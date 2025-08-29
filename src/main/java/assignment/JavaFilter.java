@@ -16,16 +16,18 @@ import org.slf4j.LoggerFactory;
  * @author Oscar Chau
  * @version 5.0
  */
-public class JavaFilter implements Predicate<FileInfo>{
+public class JavaFilter implements Predicate<FileInfo> {
     public static final JavaFilter INSTANCE = new JavaFilter();
     private static final Logger logger = LoggerFactory.getLogger(JavaFilter.class);
-    private JavaFilter(){}
+
+    private JavaFilter() {
+    }
 
     public static Predicate<ClassDesc> forClasses(Collection<FileInfo> files) {
         logger.debug("Building class filter for {} files", files.size());
         Set<String> allowedClassNames = new LinkedHashSet<>();
-        for(FileInfo fileinfo : files) {
-            if(JavaFilter.isJava(fileinfo) && fileinfo != null) {
+        for (FileInfo fileinfo : files) {
+            if (JavaFilter.isJava(fileinfo) && fileinfo != null) {
                 String baseName = Names.baseName(fileinfo.name);
                 allowedClassNames.add(baseName);
                 logger.trace("Allowed class: {}", baseName);
@@ -35,7 +37,7 @@ public class JavaFilter implements Predicate<FileInfo>{
         }
         logger.info("Class filter created with {} allowed class names", allowedClassNames.size());
         return classDesc -> classDesc != null
-                    && allowedClassNames.contains(classDesc.name);
+                && allowedClassNames.contains(classDesc.name);
     }
 
     public static boolean isJavaFileName(String name) {
