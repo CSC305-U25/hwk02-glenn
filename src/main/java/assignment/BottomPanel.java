@@ -37,7 +37,4 @@ public class BottomPanel extends JPanel {
 
         add(bottomWrap, BorderLayout.CENTER);
     }
-    private void installErrorLogSink() {
-        Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-    }
 }
