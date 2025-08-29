@@ -7,10 +7,11 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Parses Java source files to extract class and relation information.
  * Uses JavaParser to analyze source code and populate the Blackboard with
- * class and dependency/aggregation relations.
+ * class and dependency/aggregation relations for visualization.
  *
  * @author Glenn Anciado
  * @author Oscar Chau
@@ -31,7 +32,7 @@ public class Parser {
         Set<String> classNames = new LinkedHashSet<>();
         Map<String, CompilationUnit> cMap = new LinkedHashMap<>();
 
-        for(Map.Entry<String, String> e : sources.entrySet()) {
+        for (Map.Entry<String, String> e : sources.entrySet()) {
             String key = e.getKey();
             try {
                 CompilationUnit cu = StaticJavaParser.parse(e.getValue());
@@ -39,10 +40,10 @@ public class Parser {
                 Set<String> names = JavaRelationExtractor.getClassNames(cu);
                 classNames.addAll(JavaRelationExtractor.getClassNames(cu));
                 logger.trace("Parsed '{}' -> {} class/interface declaration(s): {}",
-                    key, names.size(), names);
+                        key, names.size(), names);
             } catch (Exception ex) {
                 logger.warn("Parse error in '{}' : {}", key,
-                (ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName()), ex);
+                        (ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName()), ex);
             }
         }
 
@@ -51,20 +52,20 @@ public class Parser {
             for (ClassOrInterfaceDeclaration d : cu.findAll(ClassOrInterfaceDeclaration.class)) {
                 String name = d.getNameAsString();
                 boolean isInterface = d.isInterface();
-                boolean isAbstract  = d.isAbstract();
+                boolean isAbstract = d.isAbstract();
 
                 ClassDesc prev = classMap.get(name);
                 classMap.put(name,
-                    (prev == null)
-                        ? new ClassDesc(name, isInterface, isAbstract)
-                        : new ClassDesc(name,
+                        (prev == null)
+                                ? new ClassDesc(name, isInterface, isAbstract)
+                                : new ClassDesc(name,
                                         prev.isInterface || isInterface,
-                                        prev.isAbstract  || isAbstract));
+                                        prev.isAbstract || isAbstract));
             }
         }
         List<ClassDesc> classes = new ArrayList<>(classMap.values());
         logger.debug("Collected {} unique classDesc entries (from {} parsed file(s))",
-            classes.size(), cMap.size());
+                classes.size(), cMap.size());
         List<Relation> relations = new ArrayList<>();
         for (CompilationUnit c : cMap.values()) {
             List<Relation> rels = JavaRelationExtractor.giveRelations(c, classNames);

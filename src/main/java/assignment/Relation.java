@@ -22,17 +22,31 @@ public class Relation {
         this.kind = kind;
     }
 
-    public String getSrc() { return src; }
-    public String getDst() { return dst; }
-    public Kind getKind() { return kind; }
+    public String getSrc() {
+        return src;
+    }
+
+    public String getDst() {
+        return dst;
+    }
+
+    public Kind getKind() {
+        return kind;
+    }
 
     public String plantUmlArrow() {
-        if (kind == Relation.Kind.AGGREGATION)    return " o-- ";
-        if (kind == Relation.Kind.COMPOSITION)    return " *-- ";
-        if (kind == Relation.Kind.DEPENDENCY)     return " ..> ";
-        if (kind == Relation.Kind.INHERITANCE)    return " <|-- ";
-        if (kind == Relation.Kind.IMPLEMENTATION) return " <|.. ";
-        if (kind == Relation.Kind.ASSOCIATION) return " --> ";
+        if (kind == Relation.Kind.AGGREGATION)
+            return " o-- ";
+        if (kind == Relation.Kind.COMPOSITION)
+            return " *-- ";
+        if (kind == Relation.Kind.DEPENDENCY)
+            return " ..> ";
+        if (kind == Relation.Kind.INHERITANCE)
+            return " <|-- ";
+        if (kind == Relation.Kind.IMPLEMENTATION)
+            return " <|.. ";
+        if (kind == Relation.Kind.ASSOCIATION)
+            return " --> ";
         return " ..> ";
     }
 }

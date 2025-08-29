@@ -40,7 +40,6 @@ public class Driver extends JFrame {
 
         GithubLoader.attach(topPanel.getOkButton(), topPanel.getUrlField(), fileHandler);
 
-
         setSize(1100, 800);
         setLocationRelativeTo(null);
         setVisible(true);

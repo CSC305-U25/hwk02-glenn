@@ -8,7 +8,6 @@ package assignment;
  * @author Oscar Chau
  * @version 5.0
  */
-
 public class FileInfo {
     public final String name;
     public final String path;

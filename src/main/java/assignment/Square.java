@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Represents a single square in the grid board, containing file information.
  * Each square holds a filename, line count, and a color determined by the line
- * count.
- * Used for visually representing files in the grid layout.
+ * count and file type (Java, non-Java, or folder).
+ * Used for visually representing files and folders in the grid layout.
  *
  * @author Glenn Anciado
  * @author Oscar Chau

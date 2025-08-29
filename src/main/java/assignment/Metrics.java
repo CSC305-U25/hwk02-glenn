@@ -12,15 +12,14 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Renders a simple metric plot for the project.
- * Places the class in an "Abstractness vs Instability" plane with two zones.
- * The zones are painful and useless, to visualize design quality.
- * Listens to blackboard property chagnes to revalidate and repaint.
+ * Places each class in an "Abstractness vs Instability" plane with two zones.
+ * Listens to blackboard property changes to revalidate and repaint the plot.
  *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 5.0
  */
-public class Metrics extends JPanel implements PropertyChangeListener{
+public class Metrics extends JPanel implements PropertyChangeListener {
     private static final Logger logger = LoggerFactory.getLogger(Metrics.class);
     private final Blackboard bb;
 
@@ -40,7 +39,7 @@ public class Metrics extends JPanel implements PropertyChangeListener{
         Color plotColor = new Color(160, 248, 172);
 
         FontMetrics fm = g.getFontMetrics();
-        final String xName = "Instablity", yName=  "Abstractness";
+        final String xName = "Instablity", yName = "Abstractness";
         int axisGap = Math.max(24, fm.stringWidth(yName) + 10);
 
         g.setColor(bg);
@@ -59,7 +58,7 @@ public class Metrics extends JPanel implements PropertyChangeListener{
 
         Map<String, double[]> pts = MetricsPoints.build(bb);
         logger.debug("Rendering {} metric points",
-            (pts != null ? Integer.valueOf(pts.size()) : Integer.valueOf(0)));
+                (pts != null ? Integer.valueOf(pts.size()) : Integer.valueOf(0)));
         MetricsPoints.draw(g, plot, pts, dotR);
 
     }
@@ -68,19 +67,19 @@ public class Metrics extends JPanel implements PropertyChangeListener{
         int x = pad + axisGap;
         int y = pad;
         int pw = Math.max(1, w - x - pad);
-        int ph = Math.max(1, h - y-  pad - axisGap);
+        int ph = Math.max(1, h - y - pad - axisGap);
         return new Rectangle(x, y, pw, ph);
     }
 
-    private static void drawAxisLabels(Graphics g, Rectangle p, String xName, String yName){
+    private static void drawAxisLabels(Graphics g, Rectangle p, String xName, String yName) {
         FontMetrics fm = g.getFontMetrics();
         g.setColor(Color.BLACK);
         g.drawString(xName,
-                    p.x + (p.width - fm.stringWidth(xName)) / 2,
-                    p.y + p.height + fm.getAscent() + 6);
+                p.x + (p.width - fm.stringWidth(xName)) / 2,
+                p.y + p.height + fm.getAscent() + 6);
         g.drawString(yName,
-                    p.x - fm.stringWidth(yName) - 8,
-                    p.y + (p.height + fm.getAscent()) / 2);
+                p.x - fm.stringWidth(yName) - 8,
+                p.y + (p.height + fm.getAscent()) / 2);
     }
 
     private static void drawZones(Graphics g, Rectangle p) {
@@ -90,7 +89,7 @@ public class Metrics extends JPanel implements PropertyChangeListener{
         g.setColor(Color.WHITE);
         g.drawLine(p.x, p.y, p.x + p.width, p.y + p.height);
 
-        int r = (int)Math.round(Math.min(p.width, p.height) * 0.45);
+        int r = (int) Math.round(Math.min(p.width, p.height) * 0.45);
 
         g.fillOval(p.x - r, p.y + p.height - r, 2 * r, 2 * r);
         g.fillOval(p.x + p.width - r, p.y - r, 2 * r, 2 * r);
@@ -105,8 +104,8 @@ public class Metrics extends JPanel implements PropertyChangeListener{
         int painfulWidth = fm.stringWidth(painful);
         int painfulBaseY = zone1y + (fm.getAscent() - fm.getDescent()) / 2;
         g.drawString(painful,
-                    zone1x - painfulWidth / 2,
-                    painfulBaseY);
+                zone1x - painfulWidth / 2,
+                painfulBaseY);
 
         String useless = "Useless";
         int zone2x = p.x + p.width - r / 2;
@@ -115,27 +114,31 @@ public class Metrics extends JPanel implements PropertyChangeListener{
         int uselessWidth = fm.stringWidth(useless);
         int uselessBaseY = zone2y + (fm.getAscent() - fm.getDescent()) / 2;
         g.drawString(useless,
-                    zone2x - uselessWidth / 2,
-                    uselessBaseY);
+                zone2x - uselessWidth / 2,
+                uselessBaseY);
     }
 
-    @Override public void addNotify() {
+    @Override
+    public void addNotify() {
         super.addNotify();
         bb.addPropertyChangeListener(this);
         logger.debug("Metrics attached as PropertyChangeListener");
     }
 
-    @Override public void removeNotify() {
+    @Override
+    public void removeNotify() {
         bb.removePropertyChangeListener(this);
         logger.debug("Metrics detached as PropertyChangeListener");
         super.removeNotify();
     }
+
     @Override
     public void propertyChange(PropertyChangeEvent e) {
         String p = e.getPropertyName();
         if ("files".equals(p) || "classes".equals(p) || "relations".equals(p) || "model".equals(p)) {
             logger.debug("Metric repaint triggered by property change: {}", p);
-            revalidate(); repaint();
+            revalidate();
+            repaint();
         } else {
             logger.trace("ignoring property change: {}", p);
         }

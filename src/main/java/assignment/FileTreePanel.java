@@ -11,15 +11,17 @@ import javax.swing.tree.*;
 
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+
 /**
  * Panel for displaying a file tree structure using a JTree.
  * Observes the Blackboard and updates the tree when file data changes.
+ * Provides a hierarchical view of files and folders in the repository.
  *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 5.0
  */
-public class FileTreePanel extends JPanel implements PropertyChangeListener{
+public class FileTreePanel extends JPanel implements PropertyChangeListener {
     private final Blackboard bb;
     private static final Logger logger = LoggerFactory.getLogger(FileTreePanel.class);
 
@@ -40,14 +42,13 @@ public class FileTreePanel extends JPanel implements PropertyChangeListener{
         updateTree(bb.getFiles(), treeModel, tree, root);
 
         SwingUtilities.invokeLater(
-            () -> bb.addPropertyChangeListener(this)
-        );
+                () -> bb.addPropertyChangeListener(this));
     }
 
     private void updateTree(List<FileInfo> files,
-                            DefaultTreeModel treeModel,
-                            JTree tree,
-                            DefaultMutableTreeNode root) {
+            DefaultTreeModel treeModel,
+            JTree tree,
+            DefaultMutableTreeNode root) {
         root.removeAllChildren();
         Map<String, DefaultMutableTreeNode> pathMap = new HashMap<>();
         pathMap.put("", root);
@@ -71,7 +72,8 @@ public class FileTreePanel extends JPanel implements PropertyChangeListener{
             }
         }
         treeModel.reload();
-        for (int i = 0; i < tree.getRowCount(); i++) tree.expandRow(i);
+        for (int i = 0; i < tree.getRowCount(); i++)
+            tree.expandRow(i);
         logger.debug("Tree updated with {} files (rows={})", files.size(), tree.getRowCount());
     }
 
@@ -84,16 +86,17 @@ public class FileTreePanel extends JPanel implements PropertyChangeListener{
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         String p = evt.getPropertyName();
-        if (p != null && !p.equals("files") && !p.equals("model")) return;
+        if (p != null && !p.equals("files") && !p.equals("model"))
+            return;
         logger.debug("Tree Refresh triggered: {}", p);
-        EventQueue.invokeLater(()-> {
+        EventQueue.invokeLater(() -> {
             JTree tree = null;
             DefaultTreeModel model = null;
             DefaultMutableTreeNode root = null;
             for (Component c : getComponents()) {
-                if(c instanceof JScrollPane scrollPane) {
+                if (c instanceof JScrollPane scrollPane) {
                     Component v = scrollPane.getViewport().getView();
-                    if(v instanceof JTree jt) {
+                    if (v instanceof JTree jt) {
                         tree = jt;
                         model = (DefaultTreeModel) jt.getModel();
                         root = (DefaultMutableTreeNode) model.getRoot();
@@ -101,7 +104,8 @@ public class FileTreePanel extends JPanel implements PropertyChangeListener{
                     }
                 }
             }
-            if(tree == null) return;
+            if (tree == null)
+                return;
             updateTree(bb.getFiles(), model, tree, root);
         });
     }

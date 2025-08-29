@@ -9,16 +9,18 @@ import javax.swing.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Main content panel for the application.
  * Contains the split pane with the file tree and tabbed board/relations view,
  * as well as the bottom panel for file selection status.
+ * Listens for property changes to update the board view dynamically.
  *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 5.0
  */
-public class MainPanel extends JPanel implements PropertyChangeListener{
+public class MainPanel extends JPanel implements PropertyChangeListener {
     private static final Logger logger = LoggerFactory.getLogger(MainPanel.class);
     private final Blackboard bb;
     private final Board board;
@@ -35,7 +37,6 @@ public class MainPanel extends JPanel implements PropertyChangeListener{
         Relations relations = new Relations(blackboard);
         Diagram diagram = new Diagram(blackboard);
         Metrics metrics = new Metrics(blackboard);
-
 
         JPanel centerDiagram = new JPanel(new GridBagLayout());
         centerDiagram.add(diagram, new GridBagConstraints());
@@ -91,7 +92,8 @@ public class MainPanel extends JPanel implements PropertyChangeListener{
         add(splitPane, BorderLayout.CENTER);
 
         List<Square> squares = new ArrayList<>();
-        for (var f : bb.getFiles()) squares.add(new Square(f.name, f.lines));
+        for (var f : bb.getFiles())
+            squares.add(new Square(f.name, f.lines));
         board.setSquare(squares);
     }
 
@@ -102,13 +104,15 @@ public class MainPanel extends JPanel implements PropertyChangeListener{
         return p;
     }
 
-    @Override public void addNotify() {
+    @Override
+    public void addNotify() {
         super.addNotify();
         bb.addPropertyChangeListener(this);
         logger.debug("MainPanel attached as PropertyChangeListener");
     }
 
-    @Override public void removeNotify() {
+    @Override
+    public void removeNotify() {
         bb.removePropertyChangeListener(this);
         super.removeNotify();
         logger.debug("MainPanel detached as a PropertyChangeListener");
@@ -123,7 +127,8 @@ public class MainPanel extends JPanel implements PropertyChangeListener{
         }
         EventQueue.invokeLater(() -> {
             List<Square> squares = new ArrayList<>();
-            for(var f : bb.getFiles()) squares.add(new Square(f.name, f.lines));
+            for (var f : bb.getFiles())
+                squares.add(new Square(f.name, f.lines));
             board.setSquare(squares);
             board.repaint();
             logger.info("Board updated with {} files after property change: {}", squares.size(), p);

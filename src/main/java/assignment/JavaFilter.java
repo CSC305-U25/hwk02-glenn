@@ -7,10 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Predicate implementation for fitlering Java source files.
- * Provides utility methods for recognizing Java files.
- * Creates predicates for filtering Class Description,
- * and objects based on File Info.
+ * Predicate implementation for filtering Java source files.
+ * Provides utility methods for recognizing Java files and for filtering
+ * ClassDesc and FileInfo objects based on Java file criteria.
  *
  * @author Glenn Anciado
  * @author Oscar Chau

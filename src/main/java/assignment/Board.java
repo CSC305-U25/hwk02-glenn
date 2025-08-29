@@ -14,16 +14,16 @@ import org.slf4j.LoggerFactory;
 /**
  * Visual grid board for displaying files as colored squares in a GUI.
  * Calculates optimal grid layout based on the number of files and supports
- * interactive highlighting of squares on mouse hover.
+ * dynamic updates when the file model changes.
  * Each square represents a file and is drawn with a color based on its line
- * count.
+ * count and type.
  *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 5.0
  */
 
-public class Board extends JPanel implements PropertyChangeListener{
+public class Board extends JPanel implements PropertyChangeListener {
 
     private final Blackboard bb;
     private ArrayList<Square> sq = new ArrayList<>();
@@ -37,9 +37,13 @@ public class Board extends JPanel implements PropertyChangeListener{
         sq = new ArrayList<>();
     }
 
-    public int getCols() { return cols; }
+    public int getCols() {
+        return cols;
+    }
 
-    public int getRows() { return rows; }
+    public int getRows() {
+        return rows;
+    }
 
     public void setSquare(List<Square> list) {
         this.sq = new ArrayList<>(list);
@@ -49,19 +53,26 @@ public class Board extends JPanel implements PropertyChangeListener{
 
     public void calculateSize() {
         int fileCount = (sq == null) ? 0 : sq.size();
-        if (fileCount == 0) { cols = rows = 0; return; }
+        if (fileCount == 0) {
+            cols = rows = 0;
+            return;
+        }
         int gridCol = 1, gridRow = fileCount;
         for (int r = 1; r <= Math.sqrt(fileCount); r++) {
             int c = (int) Math.ceil((double) fileCount / r);
-            if (r * c >= fileCount) { gridRow = r; gridCol = c; }
+            if (r * c >= fileCount) {
+                gridRow = r;
+                gridCol = c;
+            }
         }
         logger.trace("calculated grid {}x{} for {} files", cols, rows, fileCount);
-        cols = gridCol; rows = gridRow;
+        cols = gridCol;
+        rows = gridRow;
     }
 
     private void refreshFromModel() {
         List<Square> list = new ArrayList<>();
-        for(FileInfo f : bb.getFiles()) {
+        for (FileInfo f : bb.getFiles()) {
             list.add(new Square(f.name + ".java", f.lines, JavaFilter.INSTANCE.test(f)));
         }
         setSquare(list);
@@ -70,7 +81,9 @@ public class Board extends JPanel implements PropertyChangeListener{
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (sq == null || sq.isEmpty() || cols == 0 || rows == 0) { return; }
+        if (sq == null || sq.isEmpty() || cols == 0 || rows == 0) {
+            return;
+        }
 
         int w = getWidth() / cols, h = getHeight() / rows;
 
@@ -105,7 +118,7 @@ public class Board extends JPanel implements PropertyChangeListener{
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         String p = evt.getPropertyName();
-        if("files".equals(p) || "model".equals(p)) {
+        if ("files".equals(p) || "model".equals(p)) {
             SwingUtilities.invokeLater(this::refreshFromModel);
         }
     }

@@ -3,11 +3,20 @@ package assignment;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Panel for entering a GitHub folder URL.
+ * Contains a text field and an OK button for user input.
+ * Used as the top panel in the application UI.
+ *
+ * @author Glenn Anciado
+ * @author Oscar Chau
+ * @version 5.0
+ */
 public class TopPanel extends JPanel {
     private final JTextField urlField = new JTextField();
     private final JButton okButton = new JButton("OK");
 
-    public TopPanel( ) {
+    public TopPanel() {
         super(new BorderLayout(8, 8));
 
         Color bg = UIManager.getColor("Panel.background");
@@ -30,6 +39,12 @@ public class TopPanel extends JPanel {
 
         add(urlWrap, BorderLayout.CENTER);
     }
-    public JTextField getUrlField()   { return urlField; }
-    public JButton   getOkButton()    { return okButton; }
+
+    public JTextField getUrlField() {
+        return urlField;
+    }
+
+    public JButton getOkButton() {
+        return okButton;
+    }
 }
