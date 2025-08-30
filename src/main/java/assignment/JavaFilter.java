@@ -26,10 +26,11 @@ public class JavaFilter implements Predicate<FileInfo> {
         logger.debug("Building class filter for {} files", files.size());
         Set<String> allowedClassNames = new LinkedHashSet<>();
         for (FileInfo fileinfo : files) {
-            if (JavaFilter.isJava(fileinfo) && fileinfo != null) {
+            if (isJava(fileinfo)) {
                 String baseName = Names.baseName(fileinfo.name);
-                allowedClassNames.add(baseName);
-                logger.trace("Allowed class: {}", baseName);
+                if(allowedClassNames.add(baseName)) {
+                    logger.trace("Allowed class: {}", baseName);
+                }
             } else {
                 logger.trace("Skipping Non-Java files: {}", fileinfo != null ? fileinfo.name : "null");
             }

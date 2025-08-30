@@ -81,11 +81,10 @@ public class Relations extends JPanel implements PropertyChangeListener {
         var classIsJava = JavaFilter.forClasses(bb.getJavaFiles());
         List<ClassDesc> classes = new ArrayList<>();
         for (ClassDesc c : bb.getClasses()) {
-            if (classIsJava.test(c))
-                classes.add(c);
+            if (classIsJava.test(c)) classes.add(c);
         }
         if (classes.isEmpty()) {
-            logger.debug("no ClassDesc enrtries matched allowed classes; nothing to render");
+            logger.debug("no ClassDesc entries matched allowed classes; nothing to render");
             return;
         }
         Map<String, Rectangle> boxes = layoutCircle(getWidth(), getHeight(),
