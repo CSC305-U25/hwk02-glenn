@@ -1,4 +1,4 @@
-# Lab 03 - File Grid Display
+# 305 Final Project
 
 **Authors:** Glenn Anciado, Oscar Chau  
 **Version:** 5.0
