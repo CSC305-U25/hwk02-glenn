@@ -2,8 +2,6 @@ package assignment;
 
 import javax.swing.*;
 import java.awt.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Panel for displaying error messages at the bottom of the application.
@@ -16,13 +14,11 @@ import org.slf4j.LoggerFactory;
  * @version 5.0
  */
 public class BottomPanel extends JPanel {
-    private static final Logger logger = LoggerFactory.getLogger(BottomPanel.class);
     private final JTextField field;
 
     public BottomPanel(JTextField selectedField) {
         super(new BorderLayout(8, 8));
         this.field = selectedField;
-        Logger logger = LoggerFactory.getLogger(BottomPanel.class);
         Color bg = UIManager.getColor("Panel.background");
         setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(1, 0, 0, 0, Color.BLACK),
