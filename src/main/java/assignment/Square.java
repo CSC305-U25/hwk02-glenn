@@ -19,17 +19,16 @@ import org.slf4j.LoggerFactory;
 public class Square {
     private static final Logger logger = LoggerFactory.getLogger(Square.class);
 
-    public enum SquareKind { JAVA, FOLDER, OTHER }
     private final String fileName;
     private final int lineCount;
     private final Color color;
-    private final SquareKind kind;
+    private final boolean isJava;
 
     public Square(String fileName, int lineCount) {
-        this(fileName, lineCount, detectKind(fileName));
+        this(fileName, lineCount, false);
     }
 
-    public Square(String fileName, int lineCount, SquareKind kind) {
+    public Square(String fileName, int lineCount, boolean isJava) {
         this.fileName = fileName;
         this.lineCount = lineCount;
         this.isJava = isJava;

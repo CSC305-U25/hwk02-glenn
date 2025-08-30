@@ -81,7 +81,8 @@ public class Relations extends JPanel implements PropertyChangeListener {
         var classIsJava = JavaFilter.forClasses(bb.getJavaFiles());
         List<ClassDesc> classes = new ArrayList<>();
         for (ClassDesc c : bb.getClasses()) {
-            if (classIsJava.test(c)) classes.add(c);
+            if (classIsJava.test(c))
+                classes.add(c);
         }
         if (classes.isEmpty()) {
             logger.debug("no ClassDesc entries matched allowed classes; nothing to render");
@@ -106,7 +107,7 @@ public class Relations extends JPanel implements PropertyChangeListener {
             Rectangle rect = boxes.get(c.name);
             if (rect != null) {
                 int lines = linesByClass.getOrDefault(c.name, 0);
-                new Square(c.name, lines, Square.SquareKind.JAVA).draw(g, rect.x, rect.y, rect.width, rect.height);
+                new Square(c.name, lines, true).draw(g, rect.x, rect.y, rect.width, rect.height);
                 boxesDrawn++;
             }
         }

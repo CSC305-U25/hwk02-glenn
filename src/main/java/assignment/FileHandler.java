@@ -48,33 +48,23 @@ public class FileHandler {
         if (uh.isBlob) {
             String path = (uh.path == null) ? "" : uh.path;
             if (filter.accept(path)) {
-                boolean isJava = JavaFilter.isJavaFileName(path);
-                String name = Names.baseName(path);
-                int lines = 0;
-                if (isJava) {
-                    String content = gh.getFileContent(uh.owner, uh.repo, path, uh.ref);
-                    lines = 1 + (int) content.chars().filter(ch -> ch == '\n').count();
-                    sources.put(name,content);
-                }
-                infos.add(new FileInfo(name, path, lines));
+                String content = gh.getFileContent(uh.owner, uh.repo, path, uh.ref);
+                addFile(path, content, infos, sources);
             }
         } else {
             String folder = (uh.kind.equals("root")) ? "" : (uh.path == null ? "" : uh.path);
-            for (String path : gh.listFiles(uh.owner, uh.repo, folder, uh.ref)) {
-                if (!filter.accept(path)) continue;
-                boolean isJava = JavaFilter.isJavaFileName(path);
-                String name = Names.baseName(path);
-                int lines = 0;
-                if(isJava) {
-                    String content = gh.getFileContent(uh.owner, uh.repo, path, uh.ref);
-                    lines = 1 + (int) content.chars().filter(ch -> ch == '\n').count();
-                    sources.put(name,content);
-                }
-                infos.add(new FileInfo(name, path, lines));
+            List<String> files = gh.listFiles(uh.owner, uh.repo, folder, uh.ref);
+            for (String p : files) {
+                if (p.endsWith("/"))
+                    continue;
+                if (!filter.accept(p))
+                    continue;
+                String content = gh.getFileContent(uh.owner, uh.repo, p, uh.ref);
+                addFile(p, content, infos, sources);
             }
             List<String> folders = gh.listFolders(uh.owner, uh.repo, uh.ref, folder);
             for (String f : folders) {
-                String name = Names.baseName(f);
+                String name = simpleName(f);
                 infos.add(new FileInfo(name, f, 0));
             }
         }
