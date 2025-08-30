@@ -62,7 +62,8 @@ public class Board extends JPanel implements PropertyChangeListener{
     private void refreshFromModel() {
         List<Square> list = new ArrayList<>();
         for(FileInfo f : bb.getFiles()) {
-            list.add(new Square(f.name + ".java", f.lines, JavaFilter.INSTANCE.test(f)));
+            Square.SquareKind kind = Square.detectKind(f.name);
+            list.add(new Square(f.name + ".java", f.lines, kind));
         }
         setSquare(list);
     }

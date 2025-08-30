@@ -50,41 +50,38 @@ public class FileHandler {
         if (uh.isBlob) {
             String path = (uh.path == null) ? "" : uh.path;
             if (filter.accept(path)) {
-                String content = gh.getFileContent(uh.owner, uh.repo, path, uh.ref);
-                addFile(path, content, infos, sources);
+                boolean isJava = JavaFilter.isJavaFileName(path);
+                String name = Names.baseName(path);
+                int lines = 0;
+                if (isJava) {
+                    String content = gh.getFileContent(uh.owner, uh.repo, path, uh.ref);
+                    lines = 1 + (int) content.chars().filter(ch -> ch == '\n').count();
+                    sources.put(name,content);
+                }
+                infos.add(new FileInfo(name, path, lines));
             }
         } else {
             String folder = (uh.kind.equals("root")) ? "" : (uh.path == null ? "" : uh.path);
-            List<String> files = gh.listFiles(uh.owner, uh.repo, folder, uh.ref);
-            for (String p : files) {
-                if (p.endsWith("/"))
-                    continue;
-                if (!filter.accept(p))
-                    continue;
-                String content = gh.getFileContent(uh.owner, uh.repo, p, uh.ref);
-                addFile(p, content, infos, sources);
+            for (String path : gh.listFiles(uh.owner, uh.repo, folder, uh.ref)) {
+                if (!filter.accept(path)) continue;
+                boolean isJava = JavaFilter.isJavaFileName(path);
+                String name = Names.baseName(path);
+                int lines = 0;
+                if(isJava) {
+                    String content = gh.getFileContent(uh.owner, uh.repo, path, uh.ref);
+                    lines = 1 + (int) content.chars().filter(ch -> ch == '\n').count();
+                    sources.put(name,content);
+                }
+                infos.add(new FileInfo(name, path, lines));
             }
             List<String> folders = gh.listFolders(uh.owner, uh.repo, uh.ref, folder);
             for (String f : folders) {
-                String name = simpleName(f);
+                String name = Names.baseName(f);
                 infos.add(new FileInfo(name, f, 0));
             }
         }
         bb.setFiles(infos);
         parser.parseAll(sources);
         logger.info("fetch complete ({} ms)", (System.nanoTime() - t0)/1_000_000);
-    }
-
-    private static void addFile(String path, String content, List<FileInfo> infos,
-            Map<String, String> sources) {
-        String name = simpleName(path);
-        int lines = 1 + (int) content.chars().filter(ch -> ch == '\n').count();
-        infos.add(new FileInfo(name, path, lines));
-        sources.put(name, content);
-    }
-
-    private static String simpleName(String path) {
-        int i = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
-        return (i >= 0 && i + 1 < path.length()) ? path.substring(i + 1) : path;
     }
 }

@@ -4,11 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.AppenderBase;
 public class BottomPanel extends JPanel {
-    private static final Logger logger = LoggerFactory.getLogger(BottomPanel.class);
     private final JTextField field;
 
     public BottomPanel(JTextField selectedField) {
