@@ -12,13 +12,14 @@ import org.slf4j.LoggerFactory;
  * Stores file, class, and relation information, and notifies observers on
  * changes.
  * Used for communication between UI components and data processing logic.
+ * Provides methods for updating and retrieving files, classes, and relations.
  *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 5.0
  */
 
-public class Blackboard implements PropertyChangeListener{
+public class Blackboard implements PropertyChangeListener {
     private static final Logger logger = LoggerFactory.getLogger(Blackboard.class);
     private final List<FileInfo> files = new ArrayList<>();
     private final List<ClassDesc> classes = new ArrayList<>();
@@ -27,22 +28,29 @@ public class Blackboard implements PropertyChangeListener{
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     public void addPropertyChangeListener(PropertyChangeListener l) {
-        if (l == null) return;
+        if (l == null)
+            return;
         pcs.addPropertyChangeListener(l);
         logger.trace("Listener added: {}", l.getClass().getSimpleName());
     }
+
     public void removePropertyChangeListener(PropertyChangeListener l) {
-        if (l == null) return;
+        if (l == null)
+            return;
         pcs.removePropertyChangeListener(l);
         logger.trace("Listener removed (all props): {}", l.getClass().getSimpleName());
     }
+
     public void addPropertyChangeListener(String prop, PropertyChangeListener l) {
-        if (l == null) return;
+        if (l == null)
+            return;
         pcs.addPropertyChangeListener(prop, l);
         logger.trace("Listener added for '{}': {}", prop, l.getClass().getSimpleName());
     }
+
     public void removePropertyChangeListener(String prop, PropertyChangeListener l) {
-        if (l == null) return;
+        if (l == null)
+            return;
         pcs.removePropertyChangeListener(prop, l);
         logger.trace("Listener removed for '{}': {}", prop, l.getClass().getSimpleName());
     }
@@ -56,7 +64,8 @@ public class Blackboard implements PropertyChangeListener{
     public void setFiles(Collection<FileInfo> list) {
         var old = List.copyOf(files);
         files.clear();
-        if (list != null) files.addAll(list);
+        if (list != null)
+            files.addAll(list);
         pcs.firePropertyChange("files", old, getFiles());
         pcs.firePropertyChange("model", null, this);
     }
@@ -66,16 +75,26 @@ public class Blackboard implements PropertyChangeListener{
         var oldR = List.copyOf(relations);
         classes.clear();
         relations.clear();
-        if (cs != null) classes.addAll(cs);
-        if (rs != null) relations.addAll(rs);
+        if (cs != null)
+            classes.addAll(cs);
+        if (rs != null)
+            relations.addAll(rs);
         pcs.firePropertyChange("classes", oldC, getClasses());
         pcs.firePropertyChange("relations", oldR, getRelations());
         pcs.firePropertyChange("model", null, this);
     }
 
-    public List<FileInfo> getFiles() { return List.copyOf(files); }
-    public List<ClassDesc> getClasses() { return List.copyOf(classes); }
-    public List<Relation> getRelations() { return List.copyOf(relations); }
+    public List<FileInfo> getFiles() {
+        return List.copyOf(files);
+    }
+
+    public List<ClassDesc> getClasses() {
+        return List.copyOf(classes);
+    }
+
+    public List<Relation> getRelations() {
+        return List.copyOf(relations);
+    }
 
     public List<FileInfo> getJavaFiles() {
         List<FileInfo> onlyJava = new ArrayList<>();

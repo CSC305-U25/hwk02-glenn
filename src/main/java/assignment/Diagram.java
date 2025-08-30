@@ -17,16 +17,17 @@ import net.sourceforge.plantuml.SourceStringReader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Panel for displaying the UML diagram of the repository.
- * Listens to property change from Blackboard and builds an updated UML model.
- * Renders UML as a PNG image without temporary files.
+ * Listens to property changes from Blackboard and builds an updated UML model.
+ * Renders UML as a PNG image without temporary files using PlantUML.
  *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 5.0
  */
-public class Diagram extends JPanel implements PropertyChangeListener{
+public class Diagram extends JPanel implements PropertyChangeListener {
     private final Blackboard bb;
     private BufferedImage image;
     private static final Logger logger = LoggerFactory.getLogger(Diagram.class);
@@ -37,9 +38,9 @@ public class Diagram extends JPanel implements PropertyChangeListener{
     }
 
     private static BufferedImage renderPng(String uml) {
-        try(ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             new SourceStringReader(uml).outputImage(os, new FileFormatOption(FileFormat.PNG));
-            try(ByteArrayInputStream in = new ByteArrayInputStream(os.toByteArray())) {
+            try (ByteArrayInputStream in = new ByteArrayInputStream(os.toByteArray())) {
                 logger.debug("PlantUML rendered");
                 return ImageIO.read(in);
             }
@@ -50,8 +51,8 @@ public class Diagram extends JPanel implements PropertyChangeListener{
     }
 
     public final void updateDiagram(List<FileInfo> files,
-                                List<Relation> relations,
-                                Blackboard bb) {
+            List<Relation> relations,
+            Blackboard bb) {
         List<Square> squares = new ArrayList<>();
         for (FileInfo f : bb.getJavaFiles()) {
             squares.add(new Square(f.name, f.lines));
@@ -69,7 +70,8 @@ public class Diagram extends JPanel implements PropertyChangeListener{
         logger.debug("Diagram attached; initial render");
         EventQueue.invokeLater(() -> {
             List<Square> squares = new ArrayList<>();
-            for (FileInfo f : bb.getJavaFiles()) squares.add(new Square(f.name, f.lines));
+            for (FileInfo f : bb.getJavaFiles())
+                squares.add(new Square(f.name, f.lines));
             String uml = UmlBuilder.createUml(squares, bb.getRelations());
             image = renderPng(uml);
             revalidate();
@@ -87,11 +89,13 @@ public class Diagram extends JPanel implements PropertyChangeListener{
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         String p = evt.getPropertyName();
-        if (!"files".equals(p) && !"classes".equals(p) && !"relations".equals(p) && !"model".equals(p)) return;
+        if (!"files".equals(p) && !"classes".equals(p) && !"relations".equals(p) && !"model".equals(p))
+            return;
         logger.debug("Diagram model change: {}", p);
         EventQueue.invokeLater(() -> {
             List<Square> squares = new ArrayList<>();
-            for (FileInfo f : bb.getJavaFiles()) squares.add(new Square(f.name, f.lines));
+            for (FileInfo f : bb.getJavaFiles())
+                squares.add(new Square(f.name, f.lines));
             String uml = UmlBuilder.createUml(squares, bb.getRelations());
             image = renderPng(uml);
             revalidate();
@@ -109,6 +113,7 @@ public class Diagram extends JPanel implements PropertyChangeListener{
             g.drawString("No Diagram to Display.", 10, 20);
         }
     }
+
     @Override
     public Dimension getPreferredSize() {
         return (image != null)

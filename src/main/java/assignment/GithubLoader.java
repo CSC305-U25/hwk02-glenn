@@ -5,24 +5,27 @@ import javax.swing.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
- * Class for attaching GitHub repository loading behavior for file handling.
- * Provides a ActionListener to a button and textfield to allow for the user to
- * fetch for an enter Github url.
+ * Utility class for attaching GitHub repository loading behavior to UI
+ * controls.
+ * Provides an ActionListener to a button and text field to allow the user to
+ * fetch files from a GitHub URL and update the application model.
  *
  * @author Glenn Anciado
  * @author Oscar Chau
  * @version 5.0
  */
-public final class GithubLoader{
-    public GithubLoader() {}
+public final class GithubLoader {
+    public GithubLoader() {
+    }
 
     public static void attach(JButton okButton, JTextField urlField,
-                                FileHandler fileHandler){
+            FileHandler fileHandler) {
         Logger logger = LoggerFactory.getLogger(GithubLoader.class);
         ActionListener load = e -> {
             String url = urlField.getText().trim();
-            if(url.isEmpty()) {
+            if (url.isEmpty()) {
                 JOptionPane.showMessageDialog(okButton, "Please enter a GitHub url.");
                 return;
             }
@@ -45,8 +48,8 @@ public final class GithubLoader{
                     } catch (Exception ex) {
                         logger.error("Failed to fetch repositoy: {}", url, ex);
                     } finally {
-                    okButton.setEnabled(true);
-                    urlField.setEnabled(true);
+                        okButton.setEnabled(true);
+                        urlField.setEnabled(true);
                     }
                 }
             }.execute();

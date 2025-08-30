@@ -7,8 +7,6 @@ package assignment;
  * @author Oscar Chau
  * @version 5.0
  */
-
-
 public interface FilePathFilter {
     boolean accept(String path);
 }
